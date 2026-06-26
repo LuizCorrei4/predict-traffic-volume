@@ -32,12 +32,14 @@ The dataset includes the following columns:
 
 This project follows a standard Data Science project structure:
 
-- `data/`: Contains the dataset (divided into `raw`, `processed`, and `external`).
-- `notebooks/`: Jupyter notebooks used for Exploratory Data Analysis (EDA) and experimental modeling.
-- `src/`: Source code of the project. Contains modules for data processing (`data`), feature engineering (`features`), machine learning models (`models`), and visual plotting (`visualization`).
-- `tests/`: Unit tests for the source code.
-- `models/`: Directory to store trained and serialized machine learning models.
-- `docs/`: Project documentation.
+- `data/`: Contains the raw and processed datasets (e.g., `data/processed/clean_traffic_data.csv`).
+- `notebooks/`: Jupyter notebooks:
+  - `01-exploration.ipynb`: Exploratory Data Analysis (EDA).
+  - `02-preprocessing_and_features.ipynb`: Execution and validation of preprocessing and feature engineering.
+- `src/`: Source code of the project containing preprocessing, features, and model modules. **See [src/README.md](file:///home/gabyl/projetos/predict-traffic-volume/src/README.md) for execution commands.**
+- `tests/`: Unit tests for python modules.
+- `models/`: Stores pre-fitted scalers, encoders, and trained models (e.g., `models/scalers_and_encoders.pkl`).
+- `docs/`: Holds project documentation, including the [preprocessing and feature engineering plan](file:///home/gabyl/projetos/predict-traffic-volume/docs/preprocessing_and_feature_engineering_plan.md) with scientific and mathematical justifications.
 
 ## How to Clone and Run Locally
 
@@ -77,4 +79,21 @@ This project uses [Poetry](https://python-poetry.org/) for dependency management
    jupyter notebook
    ```
 
-Now you are fully set up to explore the data and run the machine learning models.
+### Running Pipeline Commands
+
+The pipeline can be executed using task shortcuts:
+
+*   **Preprocess and Engineer Features**:
+    ```bash
+    poetry run task preprocess
+    ```
+*   **Run Code Formatter**:
+    ```bash
+    poetry run task format
+    ```
+*   **Run Unit Tests**:
+    ```bash
+    poetry run task test
+    ```
+
+For detailed explanations of parameters and modules, check the source readme in [src/README.md](file:///home/gabyl/projetos/predict-traffic-volume/src/README.md).

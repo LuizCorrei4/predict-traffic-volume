@@ -1,5 +1,19 @@
 # Exploration Insights
 
+The dataset includes the following columns:
+
+| Atributo | Descrição | Tipo |
+| :--- | :--- | :--- |
+| `holiday` | US National holidays and regional holidays (e.g., Minnesota State Fair) | Categorical |
+| `temp` | Average temperature in Kelvin | Numeric |
+| `rain_1h` | Amount of rain in mm that occurred in the hour | Numeric |
+| `snow_1h` | Amount of snow in mm that occurred in the hour | Numeric |
+| `clouds_all` | Percentage of cloud cover | Numeric |
+| `weather_main` | Short textual description of the current weather | Categorical |
+| `weather_description` | Longer textual description of the current weather | Categorical |
+| `date_time` | Hour of the data collected (in local CST time) | DateTime |
+| **`traffic_volume`** | **(Target)** Hourly I-94 ATR 301 reported westbound traffic volume | Numeric |
+
 The data was collected from October 2012 to September 2018 and there are 48,204 records.
 
 There are 7,629 duplicate records, but we aggregated the timestamps by the following rules:
@@ -180,6 +194,11 @@ The `snow_1h` feature in its current continuous form is **quasi-constant** (near
 * **Decision:** This feature will not be used as a continuous variable in regression models, as it will likely have a coefficient of near zero.
 * **Feature Engineering:** It is convenient to convert this to a binary feature (`is_snowing`: 0 or 1) or validate it against the categorical `weather_description` column to see if snow events are being captured there instead of in this numerical column. This validation will be performed in the next section (Data Quality Check) of this notebook.
 
+#### Analysis of 'clouds_all'
+
+The `clouds_all` variable represents the percentage of cloud cover and has numerical values ranging from 0 to 100.
+From the analysis of its distribution, we observe that the data shows peaks at specific values, such as 90%, 1%, 75%, and 40%. This suggests that cloud cover is often recorded in discrete intervals or specific thresholds. These clustering patterns indicate that it might be interesting to consider this characteristic in the modeling phase, evaluating its actual correlation with traffic volume.
+
 ### Categorical Variables Analysis
 
 ![Holiday distribution](../images/01-exploration/univariate_analysis/holiday_distribution.png)
@@ -199,6 +218,12 @@ The `snow_1h` feature in its current continuous form is **quasi-constant** (near
 * The most frequently occurring weather condition is 'Clouds', followed by 'Clear', 'Rain', and 'Mist'.
 * Less common weather conditions include 'Snow', 'Fog', 'Haze', 'Thunderstorm', and 'Drizzle'.
 * For modeling, it may be useful to group less frequent weather conditions into an 'Other' category to reduce the number of categories and avoid sparsity issues. And, we can discard the categorical levels that are inexistent in the dataset.
+
+**Analysis of 'weather_description' and 'weather_main'**
+
+* The `weather_description` variable provides a more detailed classification of the general condition described by `weather_main`.
+* For example, when `weather_main` is 'Clouds', `weather_description` can be detailed as 'broken clouds', 'few clouds', 'overcast clouds', or 'scattered clouds'.
+* This demonstrates a strong hierarchical relationship between the two variables, where `weather_main` serves as the broader and macro category, while `weather_description` provides the specific weather condition. Since both carry similar information at different levels of granularity, we must evaluate during the preprocessing and modeling phase which one provides greater predictive gain, as using both could introduce redundancy.
 
 ## Data Quality Check
 
@@ -246,6 +271,13 @@ Apparently, there is no correlation between temperature and traffic volume. The 
 ![Correlation Heatmap](../images/01-exploration/bivariate_analysis/correlation_heatmap.png)
 
 ### Categorical x Numeric Analysis
+
+**Relationship between 'weather_description' and the rain variable ('rain_1h')**
+
+By cross-referencing `weather_description` with `rain_1h`, we were able to verify if the reported rain volume matches the weather description:
+* Descriptions such as "very heavy rain" contain the extreme outliers found earlier in the rain data, including the absurdly high value of 9831.3 mm, confirming the need to remove it during preprocessing.
+* In descriptions not directly linked to heavy rain (such as "light snow", "mist", and "proximity thunderstorm"), rain volumes are extremely low or zero, which confirms the partial consistency of the weather data for weaker events.
+* Overall, this check indicates consistency in that where the description is heavy rain, the numerical values are high (or even implausible outliers), but caution is required with excessive volume values that exceed the physical limits for a 1-hour window.
 
 **Box Plot of Traffic Volume by Weather Conditions**
 
