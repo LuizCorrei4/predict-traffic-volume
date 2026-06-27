@@ -35,7 +35,8 @@ We will organize the code into two main modules within `src/`:
 *   **Critical Gap (August 2014 – June 2015)**:
     *   *Decision*: **Drop this entire period** from the dataset. The gap is too large to impute without introducing high bias, and it breaks temporal models.
 *   **Small Gaps ($\le 2$ hours)**:
-    *   *Action*: Reindex the dataframe to a complete hourly frequency index. Impute gaps of 1 or 2 consecutive hours using linear interpolation for numerical values, and forward fill (`ffill`) for categorical values.
+    *   *Action*: Reindex the dataframe to a complete hourly frequency index. (Reindexing significa criar uma sequência de tempo contínua. Se o dataset pular das 10h direto para as 13h, o reindex vai inserir as linhas "11h" e "12h" forçadamente no dataset, preenchidas inicialmente com valores vazios/`NaN`. Isso transforma buracos de tempo "invisíveis" em linhas explicitamente vazias).
+    *   Com essas linhas vazias criadas, imputar (preencher) gaps de até 2 horas consecutivas usando **interpolação linear** para valores numéricos e **forward fill (`ffill`)** (repetir o último valor conhecido) para variáveis categóricas.
 *   **Large Gaps ($> 2$ hours)**:
     *   *Action*: Retain them as `NaN` (or mask them) during feature creation. Drop these rows prior to model training since we cannot train without a target (`traffic_volume`) or valid lag features.
 
