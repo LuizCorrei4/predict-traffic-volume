@@ -61,7 +61,8 @@ We will organize the code into two main modules within `src/`:
         *   `is_snowing` (1 if `snow_1h > 0` or description contains "snow" or "sleet", else 0) — *this resolves the 2,264 false-zero snow sensor errors*.
         *   `is_foggy_misty` (1 if description contains "fog", "mist", or "haze", else 0).
 
-### C. Scaling and Transformations
+### C. Scaling and Transformations (Deferred)
+**Important Note:** To prevent **Data Leakage**, scalers and encoders must never be fitted on the entire dataset. Therefore, the following steps are defined as functions but are **not** executed during the automated feature engineering pipeline. They will be applied only *after* splitting the data into training, validation, and testing sets.
 *   **Numerical Features**:
     *   `temp`: Standardize using `StandardScaler` (Z-score normalization).
     *   `clouds_all`: Min-Max scale to $[0, 1]$ or keep raw.
@@ -104,8 +105,8 @@ $$x_{\text{cos}} = \cos\left(\frac{2\pi \cdot x}{T}\right)$$
 The pipeline described in this plan has been successfully implemented and tested:
 
 1.  **Preprocessing Script**: [`src/data/preprocessing.py`](file:///home/gabyl/projetos/predict-traffic-volume/src/data/preprocessing.py) implements outlier removal (setting invalid $0\text{ K}$ temperatures and $>500\text{ mm}$ rain values to `NaN`), reindexing to a continuous hourly timescale, and applying linear/ffill interpolation to gaps $\le 2$ hours.
-2.  **Feature Script**: [`src/features/build_features.py`](file:///home/gabyl/projetos/predict-traffic-volume/src/features/build_features.py) implements the cyclical encoding transforms, weekend/rush hour flags, binary weather indicators, and standard scaling.
-3.  **Pipeline Orchestrator**: The execution notebook [`notebooks/02-preprocessing_and_features.ipynb`](file:///home/gabyl/projetos/predict-traffic-volume/notebooks/02-preprocessing_and_features.ipynb) runs the end-to-end flow, drops target-missing rows, and saves the cleaned dataset to `data/processed/clean_traffic_data.csv` (`42,880` rows, `35` features).
+2.  **Feature Script**: [`src/features/build_features.py`](file:///home/gabyl/projetos/predict-traffic-volume/src/features/build_features.py) implements the cyclical encoding transforms, weekend/rush hour flags, and binary weather indicators. It also contains scaling functions that are kept isolated for future model training stages.
+3.  **Pipeline Orchestrator**: The CLI tool [`src/run_pipeline.py`](file:///home/gabyl/projetos/predict-traffic-volume/src/run_pipeline.py) runs the end-to-end flow (using `poetry run task preprocess`), drops target-missing rows, and saves the cleaned dataset to `data/processed/clean_traffic_data.csv` (`42,880` rows, `23` features).
 
 ---
 
