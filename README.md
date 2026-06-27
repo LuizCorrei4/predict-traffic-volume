@@ -54,6 +54,27 @@ This project uses [Poetry](https://python-poetry.org/) for dependency management
    ```
    *(Or refer to the [official Poetry documentation](https://python-poetry.org/docs/#installation) for other installation methods).*
 
+### Troubleshooting: `poetry: command not found`
+
+On Linux systems, Poetry's installer places the executable in `~/.local/bin/poetry`. If you see `poetry: command not found` when trying to run commands, this directory is not in your system's `PATH` variable.
+
+**How to fix:**
+*   **Permanently add Poetry to your PATH (Recommended):**
+    Run the following command in your terminal to append it to your shell configuration (assuming you are using standard Bash):
+    ```bash
+    echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+    source ~/.bashrc
+    ```
+    *(If using Zsh, change `~/.bashrc` to `~/.zshrc` and run `source ~/.zshrc` instead).*
+
+*   **Or, use the absolute path (Temporary):**
+    Instead of typing `poetry <command>`, run:
+    ```bash
+    ~/.local/bin/poetry <command>
+    ```
+
+---
+
 ### Installation Steps
 
 1. **Clone the repository:**
@@ -63,15 +84,18 @@ This project uses [Poetry](https://python-poetry.org/) for dependency management
    ```
 
 2. **Install dependencies:**
-   Run the following command to create a virtual environment and install all the project dependencies (including development ones):
+   Run the following command to create a virtual environment and install all project dependencies:
    ```bash
    poetry install
    ```
+   *(If you get command not found, use: `~/.local/bin/poetry install`)*
 
 3. **Activate the virtual environment:**
+   This configures your current shell session to use the project's virtual environment:
    ```bash
    poetry shell
    ```
+   *(If you get command not found, use: `~/.local/bin/poetry shell`)*
 
 4. **Run the Jupyter Notebooks (Optional):**
    If you want to explore the data using the notebooks:
@@ -79,21 +103,28 @@ This project uses [Poetry](https://python-poetry.org/) for dependency management
    jupyter notebook
    ```
 
+---
+
 ### Running Pipeline Commands
 
-The pipeline can be executed using task shortcuts:
+Once your environment is set up and activated (via `poetry shell`), you can execute tasks directly:
 
 *   **Preprocess and Engineer Features**:
     ```bash
     poetry run task preprocess
     ```
-*   **Run Code Formatter**:
-    ```bash
-    poetry run task format
-    ```
+    *(Or `task preprocess` if you are inside `poetry shell`)*
+
 *   **Run Unit Tests**:
     ```bash
     poetry run task test
     ```
+    *(Or `task test` if inside `poetry shell`)*
 
-For detailed explanations of parameters and modules, check the source readme in [src/README.md](file:///home/gabyl/projetos/predict-traffic-volume/src/README.md).
+*   **Run Code Formatter**:
+    ```bash
+    poetry run task format
+    ```
+    *(Or `task format` if inside `poetry shell`)*
+
+For a more detailed explanation of pipeline configurations, arguments, and modules, check [src/README.md](file:///home/gabyl/projetos/predict-traffic-volume/src/README.md).
