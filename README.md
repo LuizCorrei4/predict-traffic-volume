@@ -91,11 +91,11 @@ On Linux systems, Poetry's installer places the executable in `~/.local/bin/poet
    *(If you get command not found, use: `~/.local/bin/poetry install`)*
 
 3. **Activate the virtual environment:**
-   This configures your current shell session to use the project's virtual environment:
+   From Poetry 2.0.0 onwards, the `shell` command is not installed by default. To activate the environment in your current terminal session, use:
    ```bash
-   poetry shell
+   source $(poetry env activate)
    ```
-   *(If you get command not found, use: `~/.local/bin/poetry shell`)*
+   *(If you get command not found, use: `source $(~/.local/bin/poetry env activate)`)*
 
 4. **Run the Jupyter Notebooks (Optional):**
    If you want to explore the data using the notebooks:
@@ -107,24 +107,24 @@ On Linux systems, Poetry's installer places the executable in `~/.local/bin/poet
 
 ### Running Pipeline Commands
 
-Once your environment is set up and activated (via `poetry shell`), you can execute tasks directly:
+Once your environment is set up and activated, you can execute tasks directly:
 
 *   **Preprocess and Engineer Features**:
     ```bash
     poetry run task preprocess
     ```
-    *(Or `task preprocess` if you are inside `poetry shell`)*
+    *(Or simply `task preprocess` if you activated the environment)*
 
 *   **Run Unit Tests**:
     ```bash
     poetry run task test
     ```
-    *(Or `task test` if inside `poetry shell`)*
+    *(Or simply `task test` if you activated the environment)*
 
 *   **Run Code Formatter**:
     ```bash
     poetry run task format
     ```
-    *(Or `task format` if inside `poetry shell`)*
+    *(Or simply `task format` if you activated the environment)*
 
 For a more detailed explanation of pipeline configurations, arguments, and modules, check [src/README.md](file:///home/gabyl/projetos/predict-traffic-volume/src/README.md).
