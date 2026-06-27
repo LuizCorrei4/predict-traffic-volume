@@ -1,6 +1,5 @@
 import pandas as pd
 import numpy as np
-from sklearn.preprocessing import StandardScaler, OneHotEncoder
 
 def extract_temporal_features(df: pd.DataFrame) -> pd.DataFrame:
     """Extracts temporal features (hour, day of week, month, year, weekend/rush hour flags)
@@ -76,52 +75,8 @@ def engineer_weather_features(df: pd.DataFrame) -> pd.DataFrame:
         
     return df_features
 
-def fit_encoders(df: pd.DataFrame):
-    """Fits and returns standardizing scalers and one-hot encoders to avoid data leakage."""
-    scalers = {}
-    
-    # Fit StandardScaler for temperature
-    if 'temp' in df.columns:
-        temp_scaler = StandardScaler()
-        temp_scaler.fit(df[['temp']].fillna(df['temp'].mean()))
-        scalers['temp_scaler'] = temp_scaler
-        
-    # Fit OneHotEncoder for weather_main
-    if 'weather_main' in df.columns:
-        ohe = OneHotEncoder(sparse_output=False, handle_unknown='ignore')
-        # We fillna with 'Clear' as it is a common baseline
-        ohe.fit(df[['weather_main']].fillna('Clear'))
-        scalers['weather_main_ohe'] = ohe
-        
-    return scalers
-
-def transform_features(df: pd.DataFrame, scalers: dict) -> pd.DataFrame:
-    """Applies the pre-fitted scalers and encoders to the dataframe."""
-    df_features = df.copy()
-    
-    # Scale temp
-    if 'temp' in df_features.columns and 'temp_scaler' in scalers:
-        mean_val = scalers['temp_scaler'].mean_[0]
-        df_features['temp_scaled'] = scalers['temp_scaler'].transform(
-            df_features[['temp']].fillna(mean_val)
-        )
-        
-    # One-hot encode weather_main
-    if 'weather_main' in df_features.columns and 'weather_main_ohe' in scalers:
-        ohe = scalers['weather_main_ohe']
-        ohe_cols = ohe.get_feature_names_out(['weather_main'])
-        
-        encoded_arr = ohe.transform(df_features[['weather_main']].fillna('Clear'))
-        encoded_df = pd.DataFrame(encoded_arr, columns=ohe_cols, index=df_features.index)
-        
-        df_features = pd.concat([df_features, encoded_df], axis=1)
-        
-    return df_features
-
 def pipeline_feature_engineering(df: pd.DataFrame) -> pd.DataFrame:
-    """Runs the full feature engineering pipeline (temporal and weather features).
-    Scalers and encoders should be applied later, after train-test split.
-    """
+    """Runs the full feature engineering pipeline (temporal and weather features)."""
     df_engineered = extract_temporal_features(df)
     df_engineered = engineer_weather_features(df_engineered)
     
