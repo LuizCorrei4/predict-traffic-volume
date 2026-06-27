@@ -118,16 +118,11 @@ def transform_features(df: pd.DataFrame, scalers: dict) -> pd.DataFrame:
         
     return df_features
 
-def pipeline_feature_engineering(df: pd.DataFrame, scalers: dict = None) -> (pd.DataFrame, dict):
-    """Runs the full feature engineering pipeline.
-    If scalers is None, it fits new ones. Otherwise, it uses the provided ones.
+def pipeline_feature_engineering(df: pd.DataFrame) -> pd.DataFrame:
+    """Runs the full feature engineering pipeline (temporal and weather features).
+    Scalers and encoders should be applied later, after train-test split.
     """
     df_engineered = extract_temporal_features(df)
     df_engineered = engineer_weather_features(df_engineered)
     
-    if scalers is None:
-        scalers = fit_encoders(df_engineered)
-        
-    df_engineered = transform_features(df_engineered, scalers)
-    
-    return df_engineered, scalers
+    return df_engineered
