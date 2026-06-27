@@ -32,7 +32,7 @@ dev = [
 ]
 
 [tool.taskipy.tasks]
-preprocess = "python src/run_pipeline.py"
-test = "pytest"
+preprocess = "PYTHONPATH=. python src/run_pipeline.py"
+test = "PYTHONPATH=. pytest"
 format = "black src tests && isort src tests"
 

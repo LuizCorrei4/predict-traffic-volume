@@ -227,3 +227,8 @@ GEMINI.md
 
 # Context 
 contexto_trabalho_AM_USP/
+
+# Models outputs
+models/
+*.pkl
+
