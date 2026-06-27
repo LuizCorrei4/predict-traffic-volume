@@ -93,9 +93,9 @@ On Linux systems, Poetry's installer places the executable in `~/.local/bin/poet
 3. **Activate the virtual environment:**
    From Poetry 2.0.0 onwards, the `shell` command is not installed by default. To activate the environment in your current terminal session, use:
    ```bash
-   source $(poetry env activate)
+   eval $(poetry env activate)
    ```
-   *(If you get command not found, use: `source $(~/.local/bin/poetry env activate)`)*
+   *(If you get command not found, use: `eval $(~/.local/bin/poetry env activate)`)*
 
 4. **Run the Jupyter Notebooks (Optional):**
    If you want to explore the data using the notebooks:
