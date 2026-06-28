@@ -1,43 +1,40 @@
 # Próximos Passos (Next Steps)
 
-Este guia serve para lembrar o que deve ser feito a seguir no repositório **predict-traffic-volume** para continuar o desenvolvimento do projeto final da USP.
+Este guia serve para lembrar o estado atual do projeto **predict-traffic-volume** para continuar o desenvolvimento do projeto final da USP.
 
 ---
 
-## 1. Executar e Validar a Pipeline (O que foi implementado)
+## 1. Revisão de EDA e Seleção de Features (Para Amanhã)
 
-Como você ainda não executou a pipeline de pré-processamento e engenharia de atributos, siga estes passos para gerar a base de modelagem:
+A pipeline de pré-processamento já foi executada e as novas features (tempo cíclico, flags de clima, flags de rush/weekend) foram geradas e validadas estatisticamente. 
 
-1.  **Ativar o ambiente virtual (Poetry)**:
-    ```bash
-    poetry shell
-    ```
-2.  **Rodar a pipeline por CLI**:
-    Execute o comando configurado no `taskipy` para pré-processar os dados brutos e extrair as features:
-    ```bash
-    task preprocess
-    ```
-    *Isso gerará os arquivos `data/processed/clean_traffic_data.csv` e `models/scalers_and_encoders.pkl`.*
-3.  **Executar e Inspecionar o Notebook interativo**:
-    Abra e rode o notebook [`notebooks/02-preprocessing_and_features.ipynb`](file:///home/gabyl/projetos/predict-traffic-volume/notebooks/02-preprocessing_and_features.ipynb) para visualizar de forma interativa os gráficos de validação (remoção de outliers de $0\text{ K}$ e $9831\text{ mm}$ de chuva, além do tratamento das falhas silenciosas do sensor de neve).
+**Tarefa Imediata do Usuário:**
+Ler o documento de insights `notebooks/02-eda_after_preprocess_insights.md` ou abrir interativamente o notebook `notebooks/02-eda_after_preprocessing.ipynb` para refletir sobre os achados e aprovar formalmente as decisões de "Feature Selection". 
+*   **Foco principal:** Entender por que vamos excluir as variáveis originais de data (`hour`, `month`, etc) e por que vamos excluir a string original `weather_main` em favor das flags booleanas criadas, evitando a *multicolinearidade*.
 
 ---
 
-## 2. Desenvolver as Próximas Fases da Disciplina
+## 2. Preparação dos Dados para Modelagem (Data Splitting & Scaling)
 
-Uma vez gerada a base limpa, as próximas etapas a serem desenvolvidas são:
+Após a aprovação formal dos insights do passo 1, a Antigravity (IA) irá:
+*   Remover do dataset as colunas decididas na etapa de Feature Selection (listadas em `02-eda_after_preprocess_insights.md`).
+*   Dividir os dados em **Treino, Validação (Dev) e Teste**.
+*   Ajustar os **Scalers** (como o StandardScaler para variáveis numéricas como `temp` e `clouds_all`) **estritamente no conjunto de Treinamento** para evitar *Data Leakage*.
+*   Aplicar a transformação nos conjuntos de Validação e Teste.
 
-### A. Seleção de Atributos (Feature Selection)
-*   Analisar a correlação das features cíclicas (`hour_sin`, `hour_cos`, `day_sin`, `day_cos`) e das novas flags climáticas (`is_raining`, `is_snowing`, `is_foggy_misty`) com o alvo `traffic_volume`.
-*   Decidir quais atributos manter para simplificar o modelo e evitar multicolinearidade (por exemplo, decidir se usará o One-Hot Encoding de `weather_main` ou se focará apenas nas flags de descrição ou em representações simplificadas).
+---
 
-### B. Treinamento e Avaliação de Modelos (Regressão)
-*   Criar o script de treinamento em `src/models/train_model.py`.
-*   Implementar pelo menos **2 modelos distintos** conforme exigido pela disciplina (ex: Regressão Linear Baseline, Random Forest/Gradient Boosting e MLP).
-*   Utilizar **Validação Cruzada K-Fold (k=5 ou k=10)** para garantir a robustez na avaliação.
-*   Otimizar hiperparâmetros (via GridSearchCV ou RandomizedSearchCV).
-*   Computar as métricas de regressão requisitadas: RMSE, MAE e $R^2$.
+## 3. Treinamento e Avaliação de Modelos de Regressão
 
-### C. Relatório Final e Apresentação
-*   Redigir o relatório final em português (seções de Introdução, Trabalhos Relacionados, Materiais e Métodos, Experimentos e Resultados, e Conclusão).
-*   Criar os slides da apresentação com base nos resultados obtidos.
+Com os dados blindados contra vazamentos e perfeitamente particionados, iniciaremos a criação matemática dos modelos em `src/models/train_model.py`:
+*   Implementar pelo menos **2 modelos distintos** conforme exigido pela disciplina (ex: Regressão Linear Baseline, Random Forest/Gradient Boosting, e uma Rede Neural Simples / MLP).
+*   Utilizar **Validação Cruzada K-Fold (k=5 ou k=10)** para garantir a robustez.
+*   Otimizar os hiperparâmetros (via GridSearchCV ou RandomizedSearchCV).
+*   Computar e comparar as métricas de regressão: **RMSE, MAE e $R^2$**.
+
+---
+
+## 4. Entregáveis Finais (Relatório e Apresentação)
+
+*   Redigir o relatório final **em português** detalhando as metodologias do repositório (Introdução, Trabalhos Relacionados, Materiais e Métodos, Experimentos e Resultados, e Conclusão).
+*   Criar os slides resumo da apresentação com foco nos insights e resultados obtidos.
