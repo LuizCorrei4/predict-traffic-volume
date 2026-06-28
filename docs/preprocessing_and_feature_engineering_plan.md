@@ -35,8 +35,8 @@ We will organize the code into two main modules within `src/`:
 *   **Critical Gap (August 2014 – June 2015)**:
     *   *Decision*: **Drop this entire period** from the dataset. The gap is too large to impute without introducing high bias, and it breaks temporal models.
 *   **Small Gaps ($\le 2$ hours)**:
-    *   *Action*: Reindex the dataframe to a complete hourly frequency index. (Reindexing significa criar uma sequência de tempo contínua. Se o dataset pular das 10h direto para as 13h, o reindex vai inserir as linhas "11h" e "12h" forçadamente no dataset, preenchidas inicialmente com valores vazios/`NaN`. Isso transforma buracos de tempo "invisíveis" em linhas explicitamente vazias).
-    *   Com essas linhas vazias criadas, imputar (preencher) gaps de até 2 horas consecutivas usando **interpolação linear** para valores numéricos e **forward fill (`ffill`)** (repetir o último valor conhecido) para variáveis categóricas.
+    *   *Action*: Reindex the dataframe to a complete hourly frequency index. (Reindexing means forcing the dataset to have a continuous time sequence. If the data jumps from 10:00 directly to 13:00, reindexing will explicitly insert empty rows for "11:00" and "12:00", initially filled with `NaN` values. This transforms "invisible" time gaps into explicitly empty rows).
+    *   Once these empty rows are created, impute (fill) gaps of up to 2 consecutive hours using **linear interpolation** for numerical values and **forward fill (`ffill`)** (repeating the last known value) for categorical variables.
 *   **Large Gaps ($> 2$ hours)**:
     *   *Action*: Retain them as `NaN` (or mask them) during feature creation. Drop these rows prior to model training since we cannot train without a target (`traffic_volume`) or valid lag features.
 
@@ -71,26 +71,45 @@ We will organize the code into two main modules within `src/`:
 ### A. Linear Interpolation for Time Series Imputation
 Linear interpolation is a mathematical method of estimating values at missing data points by drawing a straight line between the closest surrounding known values. 
 
-**Mathematical Formula:**
-Let $x_1$ and $x_2$ be the timestamps of the last known observation before the gap and the first known observation after the gap, respectively, with $y_1$ and $y_2$ being their corresponding known values (e.g., temperature). For any missing timestamp $x$ in the gap ($x_1 < x < x_2$), the estimated value $y$ is computed as:
+**Mathematical Formula & How it Works:**
+Let $x_1$ and $x_2$ be the timestamps (represented as numerical hours) of the last known observation before the gap and the first known observation after the gap. Let $y_1$ and $y_2$ be their corresponding known values (e.g., temperature). For a missing timestamp $x$ inside the gap, the estimated value $y$ is computed as:
 $$y = y_1 + \frac{x - x_1}{x_2 - x_1} \cdot (y_2 - y_1)$$
+
+In simple terms, the formula calculates the total change in the target variable ($y_2 - y_1$) divided by the total time passed ($x_2 - x_1$) to find the "rate of change per hour". It then applies this rate to figure out the exact value at the missing hour.
+
+**Numerical Example:**
+Imagine we are tracking Traffic Volume, and a sensor failed at 14:00.
+*   At 13:00 ($x_1$), the traffic was 4000 cars ($y_1$).
+*   At 15:00 ($x_2$), the traffic was 5000 cars ($y_2$).
+*   We want to estimate the traffic at the missing hour, 14:00 ($x$).
+
+Using the formula:
+$$y = 4000 + \frac{14 - 13}{15 - 13} \cdot (5000 - 4000)$$
+$$y = 4000 + \frac{1}{2} \cdot (1000) = 4000 + 500 = 4500$$
+
+The algorithm logically draws a straight line between 4000 and 5000, determining that at the exact midpoint (14:00), the traffic was exactly 4500 cars.
 
 **Conceptual Justification:**
 *   **Smooth Transitions**: Physical and environmental parameters (like temperature, cloud cover, and general weather transitions) do not change instantaneously; they fluctuate smoothly. Assuming a constant rate of change between adjacent hours is a highly robust approximation.
 *   **Threshold-Based Limits ($\le 2$ hours)**: While linear interpolation is simple and effective, its accuracy diminishes as gap size increases because it cannot capture non-linear daily patterns or sudden weather shifts over longer durations (Moritz et al., 2017). By strictly limiting imputation to short gaps ($\le 2$ hours) and dropping larger blocks, we preserve dataset integrity and prevent the injection of synthetic bias.
 
 ### B. Cyclical Encoding of Temporal Features (Trigonometric Encodings)
-Representing cyclical data (e.g., hours of the day or days of the week) as simple numerical sequences ($0, 1, 2, ..., 23$) introduces artificial discontinuities. Under a naive integer encoding, the distance between $23$ (11 PM) and $0$ (Midnight) is $23$ units, whereas in reality, they are only $1$ hour apart.
+When we use plain numbers to represent time, like $0$ for Midnight and $23$ for 11 PM, machine learning models get confused. To a model, the mathematical distance between $0$ and $23$ is very large (23 units). However, in the real world, 11 PM and Midnight are just 1 hour apart! This creates an "artificial jump" where the end of the day doesn't connect smoothly back to the start of the next day.
+
+**The Solution: The Clock Metaphor**
+To fix this, we map the hours onto a circle, exactly like the face of a clock. Instead of using a single number from 0 to 23, each hour becomes a 2D coordinate $(x, y)$ on that circular clock. 
+- The $x$-coordinate is calculated using the **cosine** of the angle.
+- The $y$-coordinate is calculated using the **sine** of the angle.
 
 **Mathematical Formula:**
-For a time variable $x$ with a known cycle period $T$ (where $T=24$ for hours, and $T=7$ for days of the week), we transform $x$ into two features representing $x$ and $y$ coordinates on a unit circle:
+For a time variable $x$ with a known cycle period $T$ (where $T=24$ for hours, and $T=7$ for days of the week), we transform it into:
 $$x_{\text{sin}} = \sin\left(\frac{2\pi \cdot x}{T}\right)$$
 $$x_{\text{cos}} = \cos\left(\frac{2\pi \cdot x}{T}\right)$$
 
-**Conceptual Justification:**
-*   **Preserving Circular Continuity**: By projecting the 1D time feature into 2D coordinates on a unit circle, we align the end of the cycle (Midnight) perfectly next to the beginning of the next cycle. The Euclidean distance between $23:00$ and $00:00$ correctly contracts to the same distance as between $00:00$ and $01:00$.
-*   **Model Compatibility**: Models (especially Neural Networks and linear architectures) can interpret this coordinate space as a continuous cyclical continuum, preventing the model from assuming midnight is "mathematically distant" from 11 PM.
-*   **Use of Pairs**: Both sine and cosine components must be used together. Using only one component (e.g., sine) creates ambiguity, as two different times in a cycle can yield the same sine value (e.g., $\sin(\theta)$ at $30^\circ$ and $150^\circ$ are identical). The cosine resolves this ambiguity by providing the orientation.
+**Why is this highly beneficial?**
+*   **Perfect Continuity**: On our mathematical "clock face", the coordinate point for 23:00 sits right next to the coordinate point for 00:00. The model now correctly understands that 11 PM and Midnight are physically close to each other, completely eliminating the artificial jump.
+*   **Resolving Ambiguities (Why we need both Sin and Cos)**: If we only use the *sine* (the vertical height on the clock), the model can't tell the difference between times that share the same height (like 3 PM and 9 PM on a 24h cycle). We must provide *both* sine and cosine so the model has the exact unique 2D position on the circle.
+*   **Better Predictions**: Traffic volume is deeply cyclical (repeating every 24 hours and every 7 days). By feeding the model a continuous geometric loop instead of a broken number line, it can learn the daily and weekly repeating patterns much more smoothly and accurately.
 
 ---
 
