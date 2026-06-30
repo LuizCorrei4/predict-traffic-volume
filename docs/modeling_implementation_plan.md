@@ -23,6 +23,7 @@ To maintain clean and professional code, the modeling phase will be split into m
     *   Instantiate a `StandardScaler`.
     *   Apply `fit_transform` **ONLY** on the continuous numerical columns of the **Train Set**.
     *   Apply `transform` (using the Train scaler) on the numerical columns of the **Validation** and **Test** sets.
+4.  **Save Split Data:** To ensure reproducibility and facilitate potential separate modeling pipelines later, the final split datasets will be explicitly saved to `data/processed/` with semantically clear names (e.g., `X_train_scaled.csv`, `y_train.csv`, `X_val_scaled.csv`, `y_val.csv`, `X_test_scaled.csv`, `y_test.csv`).
 
 ### Phase 2: Algorithm Selection & Setup (`algorithms.py`)
 We will set up three distinct algorithmic approaches to provide a comprehensive analysis for the study:
