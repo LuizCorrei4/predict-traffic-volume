@@ -44,8 +44,10 @@ def split_and_scale_data(
     print(f"Validation set: {len(X_val)} rows")
     print(f"Test set: {len(X_test)} rows")
     
-    # 3. Strict Scaling (Fit ONLY on Train to avoid leakage)
-    print("Scaling continuous numerical features strictly based on Train Set...")
+    # 3. Strict Imputation and Scaling (Fit ONLY on Train to avoid leakage)
+    print("Imputing and scaling continuous numerical features strictly based on Train Set...")
+    from sklearn.impute import SimpleImputer
+    imputer = SimpleImputer(strategy='median')
     scaler = StandardScaler()
     
     # Identify which columns to scale that are actually present
@@ -57,9 +59,11 @@ def split_and_scale_data(
     X_test_scaled = X_test.copy()
     
     if cols_to_scale:
-        X_train_scaled[cols_to_scale] = scaler.fit_transform(X_train[cols_to_scale])
-        X_val_scaled[cols_to_scale] = scaler.transform(X_val[cols_to_scale])
-        X_test_scaled[cols_to_scale] = scaler.transform(X_test[cols_to_scale])
+        # Fit imputer and scaler on train
+        X_train_scaled[cols_to_scale] = scaler.fit_transform(imputer.fit_transform(X_train[cols_to_scale]))
+        # Transform val and test
+        X_val_scaled[cols_to_scale] = scaler.transform(imputer.transform(X_val[cols_to_scale]))
+        X_test_scaled[cols_to_scale] = scaler.transform(imputer.transform(X_test[cols_to_scale]))
         
     # 4. Save to Disk
     os.makedirs(output_dir, exist_ok=True)
