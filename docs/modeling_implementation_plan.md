@@ -46,7 +46,12 @@ The orchestrator script (`train_model.py`) will be engineered to support two dis
     *   **Action:** Once the hyperparameters are finalized from Mode 1, this mode dynamically merges the Train and Validation sets together (increasing the total historical data). It trains the champion models on `Train + Val`, and evaluates them **strictly once** on the `Test` set to simulate real-world deployment.
 
 ### Phase 4: Comprehensive Evaluation & Logging (`evaluator.py`)
-To enrich the final academic report, the evaluation script will meticulously log every experimental run into a tracking file (e.g., `reports/experiment_logs.csv` or JSON). 
+To enrich the final academic report, the evaluation script will meticulously log every experimental run. Instead of a single messy file, logs will be saved as individual JSON/CSV files inside a `reports/logs/` directory.
+
+**Semantic Filenaming Convention:** 
+Each log file will have a highly semantic and chronological name containing the algorithm and the exact timestamp (Year, Month, Day, Hour, Minute). 
+*Format:* `[Algorithm]_[YYYY-MM-DD_HH-MM]_log.json` 
+*(Example: `LightGBM_2026-06-30_19-15_log.json`)*
 
 **Metrics Logged per Run:**
 1.  **Algorithm Details:** 
