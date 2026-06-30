@@ -1,0 +1,18 @@
+{
+    "timestamp_exact": "2026-06-30 20:43:42",
+    "algorithm": "lightgbm",
+    "training_time_seconds": 0.71,
+    "metrics": {
+        "RMSE": 469.0929089687034,
+        "MAE": 277.50633626615814,
+        "R2": 0.9438547787069661,
+        "MAPE_percentage": 13.583299177437484,
+        "Max_Error": 5128.289339280902
+    },
+    "hyperparameters": {
+        "n_estimators": 300,
+        "max_depth": 7,
+        "learning_rate": 0.01174442897496015,
+        "num_leaves": 80
+    }
+}

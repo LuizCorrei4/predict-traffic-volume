@@ -1,0 +1,15 @@
+{
+    "timestamp_exact": "2026-06-30 20:40:53",
+    "algorithm": "ridge",
+    "training_time_seconds": 0.01,
+    "metrics": {
+        "RMSE": 934.871417270861,
+        "MAE": 680.4541983736362,
+        "R2": 0.7770031000223444,
+        "MAPE_percentage": 51.00445403431044,
+        "Max_Error": 4012.029567004799
+    },
+    "hyperparameters": {
+        "alpha": 95.52197962781229
+    }
+}

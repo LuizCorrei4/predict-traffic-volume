@@ -1,0 +1,20 @@
+{
+    "timestamp_exact": "2026-06-30 20:28:15",
+    "algorithm": "mlp",
+    "training_time_seconds": 56.95,
+    "metrics": {
+        "RMSE": 475.9661666036047,
+        "MAE": 271.71807070821734,
+        "R2": 0.9421974195116937,
+        "MAPE_percentage": 11.38992478167558,
+        "Max_Error": 5202.26479110683
+    },
+    "hyperparameters": {
+        "hidden_layer_sizes": [
+            50,
+            50
+        ],
+        "alpha": 0.0010183591118576969,
+        "learning_rate_init": 0.00028851810305144024
+    }
+}

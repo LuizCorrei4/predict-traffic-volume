@@ -1,0 +1,18 @@
+{
+    "timestamp_exact": "2026-06-30 20:18:11",
+    "algorithm": "xgboost",
+    "training_time_seconds": 0.54,
+    "metrics": {
+        "RMSE": 471.5758557194927,
+        "MAE": 283.9078623509122,
+        "R2": 0.9432588432977536,
+        "MAPE_percentage": 15.087673934892251,
+        "Max_Error": 4947.06396484375
+    },
+    "hyperparameters": {
+        "n_estimators": 300,
+        "max_depth": 6,
+        "learning_rate": 0.011227595811940308,
+        "subsample": 0.5295207041675385
+    }
+}

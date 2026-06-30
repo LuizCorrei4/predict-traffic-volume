@@ -37,15 +37,28 @@ If we keep `weather_main`, we would have to create 11 new One-Hot Encoded column
 
 ---
 
-## 3. Final Feature Selection Checklist
+## 3. Final Dataset Format (Sealed)
 
-Before splitting the dataset into Train/Validation/Test, we will remove the following columns:
+Based on the EDA and data quality checks, we have reached a consensus on the final schema for the dataset before modeling. We prioritize robust engineered features over sparse or faulty raw data to prevent multicollinearity and confusion in algorithms.
 
-1.  `holiday`: Replaced by the cleaner `is_holiday` flag.
-2.  `weather_main`: Dropped to prevent multicollinearity and high dimensionality.
-3.  `weather_description`: Replaced by `is_raining`, `is_snowing`, and `is_foggy_misty`.
-4.  `hour`, `day_of_week`, `month`, `year`: Replaced by trigonometric cyclical features and boolean flags.
-5.  `rain_1h`: Replaced by the transformed `rain_1h_log` to handle extreme skewness.
+### A. Columns to KEEP
+*   **Target:** `traffic_volume`
+*   **Continuous/Numeric Features (will be scaled):**
+    *   `temp`: Corrected temperature.
+    *   `clouds_all`: Cloud cover percentage.
+    *   `rain_1h_log`: Log-transformed rainfall (to handle extreme skewness).
+*   **Cyclical Temporal Features (Sine/Cosine):**
+    *   `hour_sin`, `hour_cos`, `day_sin`, `day_cos`.
+*   **Binary Flags (no scaling required):**
+    *   `is_weekend`, `is_rush_hour`, `is_holiday`.
+    *   `is_raining`, `is_snowing`, `is_foggy_misty`.
+
+### B. Columns to DROP
+*   **Raw Dates:** `hour`, `day_of_week`, `month`, `year` (Replaced by cyclical coordinates to avoid non-linear sequence confusion).
+*   **Categorical Text:** `weather_main`, `weather_description`, `holiday` (Replaced by robust binary flags. Keeping them would require One-Hot Encoding, introducing massive dimensionality and severe multicollinearity).
+*   **Faulty/Skewed Numerics:** 
+    *   `snow_1h`: Dropped due to 2,264 "silent failure" sensor errors (where the text description reported snow but the numerical sensor reported 0.0). The engineered `is_snowing` flag is significantly more reliable.
+    *   `rain_1h`: Dropped in favor of `rain_1h_log`.
 
 ### Next Steps:
-We will now move to the Modeling phase, applying these column drops, splitting the data (Train/Dev/Test) while strictly avoiding Data Leakage, and then fitting our Scalers purely on the training set.
+We will proceed to split the data (Train/Validation/Test) strictly respecting the temporal order to prevent Data Leakage, and then fit our Scalers purely on the training set.

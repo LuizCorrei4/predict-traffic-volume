@@ -1,0 +1,17 @@
+{
+    "timestamp_exact": "2026-06-30 20:44:38",
+    "algorithm": "catboost",
+    "training_time_seconds": 0.84,
+    "metrics": {
+        "RMSE": 469.2547805248466,
+        "MAE": 272.18383424081503,
+        "R2": 0.9438160235595939,
+        "MAPE_percentage": 12.550425214665925,
+        "Max_Error": 5018.513605429871
+    },
+    "hyperparameters": {
+        "iterations": 150,
+        "depth": 10,
+        "learning_rate": 0.02925366355576967
+    }
+}

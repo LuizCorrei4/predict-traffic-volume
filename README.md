@@ -1,12 +1,26 @@
 # predict-traffic-volume
 
-Predicting traffic volume on the I-94 Interstate highway.
+Predicting traffic volume on the I-94 Interstate highway using Machine Learning.
+
+This project is the final assignment for the **Machine Learning (SCC-276)** course at the University of São Paulo (USP). It explores the complexities of stochastic traffic behavior through robust Data Science methodology, cyclical time-feature engineering, and Bayesian Hyperparameter Tuning.
+
+---
+
+## General Panorama & Methodology
+
+The core goal is to predict the continuous target `traffic_volume` using a set of historical and meteorological variables. 
+To ensure scientific rigor and prevent *Data Leakage* or *Look-Ahead Bias*, we implemented:
+1. **Strict Chronological Data Splitting:** The data is split into Train (70%), Validation (15%), and Test (15%) strictly by time.
+2. **Isolated Scaling & Imputation:** Scaling (`StandardScaler`) and Imputation (`SimpleImputer`) are fitted *only* on the Training partition.
+3. **Advanced Temporal Engineering:** We extracted day, month, and hour from the timestamps and applied **cyclical encoding (sine/cosine transformations)** to help machine learning models understand that 23:00 and 00:00 are consecutive hours.
+4. **Model Architecture:** We evaluate six state-of-the-art algorithms: Ridge, Random Forest, XGBoost, LightGBM, CatBoost, and MLP (Neural Networks).
+5. **Bayesian Orchestration:** We use `Optuna` paired with `TimeSeriesSplit` to find the absolute best hyperparameters dynamically.
+
+---
 
 ## Dataset
 
-This project uses the **Metro Interstate Traffic Volume** dataset from the UCI Machine Learning Repository. This dataset contains hourly westbound traffic volume data for the I-94 Interstate highway, recorded at the MN DoT ATR station 301 (located roughly midway between Minneapolis and St. Paul, Minnesota).
-
-The data was collected from October 2012 to January 2018 and includes weather and holiday information.
+This project uses the **Metro Interstate Traffic Volume** dataset from the UCI Machine Learning Repository. This dataset contains hourly westbound traffic volume data for the I-94 Interstate highway, recorded at the MN DoT ATR station 301.
 
 - **Original Source:** [UCI Machine Learning Repository: Metro Interstate Traffic Volume](https://archive.ics.uci.edu/dataset/492/metro+interstate+traffic-volume)
 - **Instances:** 48,204
@@ -14,11 +28,9 @@ The data was collected from October 2012 to January 2018 and includes weather an
 
 ### Attributes
 
-The dataset includes the following columns:
-
-| Atributo | Descrição | Tipo |
+| Attribute | Description | Type |
 | :--- | :--- | :--- |
-| `holiday` | US National holidays and regional holidays (e.g., Minnesota State Fair) | Categorical |
+| `holiday` | US National holidays and regional holidays | Categorical |
 | `temp` | Average temperature in Kelvin | Numeric |
 | `rain_1h` | Amount of rain in mm that occurred in the hour | Numeric |
 | `snow_1h` | Amount of snow in mm that occurred in the hour | Numeric |
@@ -28,52 +40,22 @@ The dataset includes the following columns:
 | `date_time` | Hour of the data collected (in local CST time) | DateTime |
 | **`traffic_volume`** | **(Target)** Hourly I-94 ATR 301 reported westbound traffic volume | Numeric |
 
+---
+
 ## Project Structure
 
-This project follows a standard Data Science project structure:
-
 - `data/`: Contains the raw and processed datasets (e.g., `data/processed/clean_traffic_data.csv`).
-- `notebooks/`: Jupyter notebooks:
-  - `01-exploration.ipynb`: Exploratory Data Analysis (EDA).
-  - `02-preprocessing_and_features.ipynb`: Execution and validation of preprocessing and feature engineering.
-- `src/`: Source code of the project containing preprocessing, features, and model modules. **See [src/README.md](file:///home/gabyl/projetos/predict-traffic-volume/src/README.md) for execution commands.**
-- `tests/`: Unit tests for python modules.
-- `models/`: Stores pre-fitted scalers, encoders, and trained models (e.g., `models/scalers_and_encoders.pkl`).
-- `docs/`: Holds project documentation, including the [preprocessing and feature engineering plan](file:///home/gabyl/projetos/predict-traffic-volume/docs/preprocessing_and_feature_engineering_plan.md) with scientific and mathematical justifications.
+- `notebooks/`: Jupyter notebooks used exclusively for initial Exploratory Data Analysis (EDA).
+- `src/`: Production source code of the project. Contains the model factories, evaluator, orchestrator, and plotting scripts. **(See [src/README.md](src/README.md) for deeper details).**
+- `reports/`: Stores the generated JSON metrics logs (`reports/logs/`) and visualization graphs (`reports/figures/`).
+- `models/`: Stores serialized, production-ready `.pkl` models.
+- `docs/` and `contexto_trabalho_AM_USP/`: Contains the academic requirements and drafts for the final report.
+
+---
 
 ## How to Clone and Run Locally
 
-This project uses [Poetry](https://python-poetry.org/) for dependency management and packaging.
-
-### Prerequisites
-
-1. **Python 3.12+** must be installed on your system.
-2. **Poetry** must be installed. If you don't have it, you can install it by running:
-   ```bash
-   curl -sSL https://install.python-poetry.org | python3 -
-   ```
-   *(Or refer to the [official Poetry documentation](https://python-poetry.org/docs/#installation) for other installation methods).*
-
-### Troubleshooting: `poetry: command not found`
-
-On Linux systems, Poetry's installer places the executable in `~/.local/bin/poetry`. If you see `poetry: command not found` when trying to run commands, this directory is not in your system's `PATH` variable.
-
-**How to fix:**
-*   **Permanently add Poetry to your PATH (Recommended):**
-    Run the following command in your terminal to append it to your shell configuration (assuming you are using standard Bash):
-    ```bash
-    echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
-    source ~/.bashrc
-    ```
-    *(If using Zsh, change `~/.bashrc` to `~/.zshrc` and run `source ~/.zshrc` instead).*
-
-*   **Or, use the absolute path (Temporary):**
-    Instead of typing `poetry <command>`, run:
-    ```bash
-    ~/.local/bin/poetry <command>
-    ```
-
----
+This project uses [Poetry](https://python-poetry.org/) for dependency management.
 
 ### Installation Steps
 
@@ -84,47 +66,49 @@ On Linux systems, Poetry's installer places the executable in `~/.local/bin/poet
    ```
 
 2. **Install dependencies:**
-   Run the following command to create a virtual environment and install all project dependencies:
    ```bash
    poetry install
    ```
-   *(If you get command not found, use: `~/.local/bin/poetry install`)*
 
 3. **Activate the virtual environment:**
-   From Poetry 2.0.0 onwards, the `shell` command is not installed by default. To activate the environment in your current terminal session, use:
    ```bash
    eval $(poetry env activate)
-   ```
-   *(If you get command not found, use: `eval $(~/.local/bin/poetry env activate)`)*
-
-4. **Run the Jupyter Notebooks (Optional):**
-   If you want to explore the data using the notebooks:
-   ```bash
-   jupyter notebook
    ```
 
 ---
 
-### Running Pipeline Commands
+## Running the Latest ML Experiments
 
-Once your environment is set up and activated, you can execute tasks directly:
+Once your environment is set up and activated, you can execute the end-to-end Machine Learning pipeline:
 
-*   **Preprocess and Engineer Features**:
+### 1. Preprocess the Data
+Cleans the raw dataset, applies cyclical encoding, and generates `clean_traffic_data.csv`.
+```bash
+poetry run python src/run_pipeline.py
+```
+
+### 2. Split and Scale Data
+Partitions the data chronologically (70/15/15) and strictly fits scalers on the Train partition.
+```bash
+poetry run python src/models/data_splitter.py
+```
+
+### 3. Run Hyperparameter Tuning (Validation Mode)
+Use the Master Orchestrator to train algorithms using Bayesian Optimization (`Optuna`).
+*   **Run a deep search for the best algorithms (50 trials each):**
     ```bash
-    poetry run task preprocess
+    poetry run python src/models/train_model.py --mode validation --models random_forest xgboost lightgbm catboost --trials 50
     ```
-    *(Or simply `task preprocess` if you activated the environment)*
 
-*   **Run Unit Tests**:
-    ```bash
-    poetry run task test
-    ```
-    *(Or simply `task test` if you activated the environment)*
+### 4. Generate Visualization Reports
+Automatically reads the JSON logs generated by the training step and outputs beautiful Matplotlib/Seaborn metric comparisons and Time Series charts (Actual vs Predicted) to `reports/figures/`.
+```bash
+poetry run python src/models/plot_metrics.py
+```
 
-*   **Run Code Formatter**:
-    ```bash
-    poetry run task format
-    ```
-    *(Or simply `task format` if you activated the environment)*
-
-For a more detailed explanation of pipeline configurations, arguments, and modules, check [src/README.md](file:///home/gabyl/projetos/predict-traffic-volume/src/README.md).
+### 5. Final Evaluation (Test Mode / The Vault)
+*(Execute this ONLY once you have decided on the absolute best model).*
+Train on the concatenated Train + Validation sets and evaluate once on the untouchable Test Set.
+```bash
+poetry run python src/models/train_model.py --mode test --models random_forest --trials 50
+```
