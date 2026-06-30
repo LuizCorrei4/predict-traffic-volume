@@ -37,14 +37,19 @@ To ensure our study evaluates the true state-of-the-art for tabular regression, 
 ### Phase 3: Advanced Hyperparameter Tuning & Execution Modes
 We will bypass simple grid searches and adopt **Bayesian Optimization** using the `Optuna` library to find optimal configurations efficiently. 
 
-**Execution Modes via CLI Arguments:**
-The orchestrator script (`train_model.py`) will be engineered to support two distinct execution modes via command-line arguments (e.g., `--mode validation` vs `--mode test`):
+**Execution Modes & Algorithm Selection via CLI Arguments:**
+The orchestrator script (`train_model.py`) will be engineered to support extreme flexibility via command-line arguments:
 
-*   **Mode 1: Validation & Tuning (`--mode validation`)**
-    *   **Action:** Trains the algorithms on the `Train` set and uses `Optuna` (with `TimeSeriesSplit`) to evaluate performance on the `Validation` set.
-    *   **The Golden Rule:** Under absolutely no circumstances will the Test Set be loaded or touched during this mode.
-*   **Mode 2: Final Testing (`--mode test`)**
-    *   **Action:** Once the hyperparameters are finalized from Mode 1, this mode dynamically merges the Train and Validation sets together (increasing the total historical data). It trains the champion models on `Train + Val`, and evaluates them **strictly once** on the `Test` set to simulate real-world deployment.
+1.  **Algorithm Selection (`--models`):** 
+    *   **First Iteration (Default):** If no specific model is passed, the script will loop through, train, tune, and log *all* available algorithms (Linear Regression, Random Forest, XGBoost, LightGBM, CatBoost, MLP).
+    *   **Targeted Iterations:** Users can pass specific algorithm names (e.g., `--models xgboost lightgbm`) to run and tune only those specific models. This saves massive amounts of compute time during deep-dive experiments.
+
+2.  **Execution Modes (`--mode`):**
+    *   **Mode 1: Validation & Tuning (`--mode validation`)**
+        *   **Action:** Trains the selected algorithms on the `Train` set and uses `Optuna` (with `TimeSeriesSplit`) to evaluate performance and tune hyperparameters on the `Validation` set.
+        *   **The Golden Rule:** Under absolutely no circumstances will the Test Set be loaded or touched during this mode.
+    *   **Mode 2: Final Testing (`--mode test`)**
+        *   **Action:** Once the hyperparameters are finalized from Mode 1, this mode dynamically merges the Train and Validation sets together. It trains the selected champion models on `Train + Val`, and evaluates them **strictly once** on the `Test` set to simulate real-world deployment.
 
 ### Phase 4: Comprehensive Evaluation & Logging (`evaluator.py`)
 To enrich the final academic report, the evaluation script will meticulously log every experimental run. Instead of a single messy file, logs will be saved as individual JSON/CSV files inside a `reports/logs/` directory.
