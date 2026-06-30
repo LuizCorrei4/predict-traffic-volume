@@ -31,10 +31,14 @@ We will set up three distinct algorithmic approaches to provide a comprehensive 
 2.  **XGBoost Regressor (Tree-based):** State-of-the-art for tabular data. Handles non-linearities and complex feature interactions (like weather + rush hour) natively.
 3.  **Multi-Layer Perceptron (Neural Network):** A basic deep learning approach (`sklearn.neural_network.MLPRegressor`) to capture highly complex mappings, testing if an MLP outperforms standard trees on this dataset.
 
-### Phase 3: Hyperparameter Tuning Strategy
-To find the best configuration for each model without manually guessing, we will use **RandomizedSearchCV** (or `GridSearchCV` for smaller spaces) combined with `TimeSeriesSplit`.
-*   **TimeSeriesSplit:** A cross-validation technique in `scikit-learn` specifically for time series. Instead of random K-Folds, it validates on sequential forward-rolling chunks of the data, ensuring the model never sees future data during tuning.
-*   **Workflow:** We will train on the Train set, tune hyperparameters using `TimeSeriesSplit`, validate against the Validation set to select the best model class, and finally test the absolute best model on the unseen Test set.
+### Phase 3: Advanced Hyperparameter Tuning Strategy (`Optuna`)
+To find the best configuration for each model efficiently, we will bypass simple grid or random searches and adopt **Bayesian Optimization** using the `Optuna` library. Bayesian Optimization is highly sophisticated: it learns from previous tuning trials to intelligently guess the next set of hyperparameters, converging to optimal solutions much faster than random search.
+
+*   **TimeSeriesSplit Integration:** Inside the `Optuna` objective function, we will use `TimeSeriesSplit` from `scikit-learn`. Instead of random K-Folds, it evaluates on sequential forward-rolling chunks of the training data, ensuring the model never peeks into the future during tuning.
+*   **The Golden Rule of the Test Set:** **Under absolutely no circumstances will the Test Set (`X_test_scaled.csv`, `y_test.csv`) be touched during the training, tuning, or algorithm selection phases.** 
+    1. We train on the Train set.
+    2. We tune hyperparameters and select the absolute best algorithm based *exclusively* on the Validation Set metrics.
+    3. The Test Set remains locked away in a "vault" until the very end, serving only as the final, unbiased benchmark for the single chosen champion model to simulate real-world deployment performance.
 
 ### Phase 4: Evaluation & Artifacts (`evaluator.py`)
 For each trained model, the orchestrator will generate:
