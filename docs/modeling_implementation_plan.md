@@ -64,7 +64,10 @@ Each log file will have a highly semantic and chronological name containing the 
     *   Algorithm Name (e.g., "LightGBM").
     *   Underlying Library/Tool (e.g., "lightgbm library v4.3").
     *   Exact Hyperparameters used (e.g., `learning_rate=0.01`, `max_depth=6`).
-2.  **Performance Metrics:** RMSE, MAE, and $R^2$.
+2.  **Performance Metrics:** 
+    *   **RMSE, MAE, and $R^2$:** The standard academic metrics for regression.
+    *   **MAPE (Mean Absolute Percentage Error):** Translates the error into a percentage (e.g., "the model erred by 9% on average"), providing vital scale-aware context.
+    *   **Max Error:** Captures the single worst absolute prediction made by the model, crucial for identifying failure modes in extreme edge cases.
 3.  **Computational Cost:** **Training Time (in seconds)**. This is crucial for comparing the trade-off between predictive accuracy and computational efficiency (e.g., comparing XGBoost speed vs. LightGBM speed in the final report).
 
 **Visual Artifacts:** Scatter plots of Actual vs. Predicted, and Time Series line plots of a 1-week window to inspect peak capture. Best models will be serialized via `joblib`.
