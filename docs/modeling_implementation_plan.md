@@ -18,10 +18,11 @@ To maintain clean and professional code, the modeling phase will be split into m
     *   **Train Set:** 70% of the timeline.
     *   **Validation (Dev) Set:** 15% (Used for hyperparameter tuning and model selection).
     *   **Test Set:** 15% (Used exclusively for final, unbiased evaluation).
-2.  **Strict Scaling (Avoiding Data Leakage):**
+2.  **Modular Feature Selection Integration:** To avoid hardcoding column names inside the splitting logic, we will create a configuration structure (e.g., `src/models/features_config.json` or `.py`). This config will explicitly list the columns to KEEP and DROP exactly as concluded in `notebooks/02-eda_after_preprocess_insights.md` (e.g., dropping `weather_main`, `hour`, etc.). The `data_splitter.py` will dynamically read this configuration to filter the dataset, isolating `X` (features) and `y` (`traffic_volume`). This guarantees the code remains agnostic, clean, and highly maintainable.
+3.  **Strict Scaling (Avoiding Data Leakage):**
     *   Apply `fit_transform` of `StandardScaler` **ONLY** on the continuous numerical columns of the **Train Set**.
     *   Apply `transform` on the **Validation** and **Test** sets.
-3.  **Save Split Data:** The final split datasets will be explicitly saved to `data/processed/` with semantically clear names (e.g., `X_train_scaled.csv`, `y_train.csv`, `X_val_scaled.csv`, etc.).
+4.  **Save Split Data:** The final split datasets will be explicitly saved to `data/processed/` with semantically clear names (e.g., `X_train_scaled.csv`, `y_train.csv`, `X_val_scaled.csv`, etc.).
 
 ### Phase 2: Algorithm Selection & Setup (`algorithms.py`)
 To ensure our study evaluates the true state-of-the-art for tabular regression, we will implement a robust suite of algorithms:
