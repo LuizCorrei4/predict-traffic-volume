@@ -1,40 +1,37 @@
-# Próximos Passos (Next Steps)
+# Próximos Passos (Para Amanhã) 🚀
 
-Este guia serve para lembrar o estado atual do projeto **predict-traffic-volume** para continuar o desenvolvimento do projeto final da USP.
+Este documento centraliza as últimas ações manuais e burocráticas que você deve fazer para entregar o trabalho da USP (SCC-276) com maestria.
 
----
+## 1. Entrega no e-Disciplinas
+Você precisa compactar parte deste repositório para o sistema da USP.
+A Profa. Roseli e os monitores precisam conseguir ler e rodar o projeto de maneira fácil.
+**O que fazer:**
+- Crie uma pasta temporária (ex: `entrega_am_usp_seu_nome/`).
+- Copie para dentro dela:
+  - A pasta `src/` (onde toda a magia acontece de verdade).
+  - A pasta `reports/figures/` (provando que extraímos gráficos de ponta).
+  - O `pyproject.toml` e `poetry.lock` (para reprodutibilidade).
+  - O arquivo `README.md` raiz (ele já está excelente e em inglês explicando tudo).
+  - **Dica de Ouro:** Adicione um pequeno README complementar em português (`LEIA-ME_USP.md`) instruindo o monitor a olhar o `README.md` principal, e explicando brevemente como você construiu o pipeline de avaliação (`train_model.py` com `Optuna`).
+- Compacte a pasta gerando um `.zip`.
 
-## 1. Revisão de EDA e Seleção de Features (Para Amanhã)
+## 2. Redação do Artigo no Overleaf (.tex)
+O relatório final acadêmico oficial em PDF (aquele que pesa na nota).
+**O que fazer:**
+- Abra o Overleaf e crie um projeto com o template da SBC (ou o sugerido pela disciplina).
+- Abra o nosso arquivo `docs/draft_relatorio_final.md`. Todo o roteiro, da Introdução à Conclusão, está lá.
+- Você precisa literalmente apenas transferir os parágrafos do nosso Markdown para o `.tex`. 
+- Na seção **Experimentos (IV.1 e IV.2)**, utilize o comando `\includegraphics{}` do LaTeX para colar as imagens que geramos hoje e que estão salvas em `reports/figures/` (o painel comparativo `metrics_comparison.png` e os recortes temporais de Teste `RANDOM_FOREST_ts_month.png` e `_3days.png`).
 
-A pipeline de pré-processamento já foi executada e as novas features (tempo cíclico, flags de clima, flags de rush/weekend) foram geradas e validadas estatisticamente. 
+## 3. Preparação dos Slides e Apresentação (10 Minutos)
+A coroação do seu trabalho. Uma boa apresentação disfarça qualquer falha e eleva projetos ótimos para o nível da excelência.
+**O que fazer:**
+- Abra o PowerPoint ou Google Slides.
+- Leia o arquivo `docs/slides_apresentacao.md`. Eu desenhei exatamente 12 slides com os *bullet points* cruciais.
+- Copie e cole os textos. Adicione as imagens correspondentes.
+- **Dica de Apresentação:** Em apresentações curtas (10 min), o maior erro é se alongar muito explicando o que é Random Forest (a banca já sabe). **Gaste o seu tempo** provando os seus diferenciais competitivos:
+  1. Mostre como você superou a falha no dataset (os buracos de 300 dias) escapando do ARIMA.
+  2. Prove metodologicamente que você isolou o conjunto de teste temporalmente (*zero data leakage*).
+  3. Mostre o gráfico de recortes de **3 Dias** (as microtendências), destacando como o uso trigonométrico (seno e cosseno para as horas do dia) possibilitou a Árvore de Decisão surfar nas ondas do horário de pico humano de forma brilhante, atingindo uma precisão massiva de **95% (R²)**.
 
-**Tarefa Imediata do Usuário:**
-Ler o documento de insights `notebooks/02-eda_after_preprocess_insights.md` ou abrir interativamente o notebook `notebooks/02-eda_after_preprocessing.ipynb` para refletir sobre os achados e aprovar formalmente as decisões de "Feature Selection". 
-*   **Foco principal:** Entender por que vamos excluir as variáveis originais de data (`hour`, `month`, etc) e por que vamos excluir a string original `weather_main` em favor das flags booleanas criadas, evitando a *multicolinearidade*.
-
----
-
-## 2. Preparação dos Dados para Modelagem (Data Splitting & Scaling)
-
-Após a aprovação formal dos insights do passo 1, a Antigravity (IA) irá:
-*   Remover do dataset as colunas decididas na etapa de Feature Selection (listadas em `02-eda_after_preprocess_insights.md`).
-*   Dividir os dados em **Treino, Validação (Dev) e Teste**.
-*   Ajustar os **Scalers** (como o StandardScaler para variáveis numéricas como `temp` e `clouds_all`) **estritamente no conjunto de Treinamento** para evitar *Data Leakage*.
-*   Aplicar a transformação nos conjuntos de Validação e Teste.
-
----
-
-## 3. Treinamento e Avaliação de Modelos de Regressão
-
-Com os dados blindados contra vazamentos e perfeitamente particionados, iniciaremos a criação matemática dos modelos em `src/models/train_model.py`:
-*   Implementar pelo menos **2 modelos distintos** conforme exigido pela disciplina (ex: Regressão Linear Baseline, Random Forest/Gradient Boosting, e uma Rede Neural Simples / MLP).
-*   Utilizar **Validação Cruzada K-Fold (k=5 ou k=10)** para garantir a robustez.
-*   Otimizar os hiperparâmetros (via GridSearchCV ou RandomizedSearchCV).
-*   Computar e comparar as métricas de regressão: **RMSE, MAE e $R^2$**.
-
----
-
-## 4. Entregáveis Finais (Relatório e Apresentação)
-
-*   Redigir o relatório final **em português** detalhando as metodologias do repositório (Introdução, Trabalhos Relacionados, Materiais e Métodos, Experimentos e Resultados, e Conclusão).
-*   Criar os slides resumo da apresentação com foco nos insights e resultados obtidos.
+Boa sorte! Vá lá e garanta o 10.
