@@ -1,7 +1,7 @@
 # Previsão de Volume de Tráfego: Uma Abordagem Comparativa com Algoritmos de Machine Learning
 
 **Membros do Grupo:** Luiz Correia (Nº USP: 15639682)
-**Disciplina:** SCC-276 — Aprendizado de Máquina  
+**Disciplina:** SCC-276 — Aprendizado de Máquina (USP)  
 **Professora:** Roseli Aparecida Francelin Romero  
 
 ---
@@ -16,15 +16,16 @@ Para solucionar este desafio de regressão de série temporal, aplicamos um lequ
 
 ## II. Trabalhos Relacionados
 
-A predição de tráfego tem sido amplamente estudada na intersecção entre Engenharia de Transportes e Ciência de Dados. Abaixo, destacamos cinco estudos relevantes recentes que abordam este desafio:
+A predição de tráfego tem sido amplamente estudada na intersecção entre Engenharia de Transportes e Ciência de Dados. Abaixo, destacamos estudos relevantes recentes que abordam este desafio e fundamentam as escolhas deste projeto:
 
 1. **Williams & Hoel (2003)**: Investigaram a modelagem e previsão de fluxo de tráfego veicular utilizando modelos estatísticos tradicionais como SARIMA (*Seasonal ARIMA*). O modelo obteve um MAPE (*Mean Absolute Percentage Error*) em torno de 12% a 15% em cenários regulares de curto prazo. No entanto, os autores apontaram que a abordagem estatística pura falha ao incorporar variáveis climáticas imprevisíveis e exige séries temporais rigorosamente contínuas, sem falhas na coleta de dados.
-2. **Vlahogianni et al. (2014)**: Realizaram uma revisão extensiva evidenciando a transição para métodos de Aprendizado de Máquina. Eles destacaram que Redes Neurais Artificiais (como o *Multi-Layer Perceptron*) conseguiam superar modelos estatísticos tradicionais no tráfego de curto prazo ao modelar não-linearidades complexas, atingindo RMSEs significativamente menores do que modelos lineares concorrentes da época.
-3. **Cheng et al. (2017)**: Conduziram um estudo específico aplicando o algoritmo **Random Forest** para previsão de fluxo de tráfego rodoviário. O trabalho focou no poder do algoritmo de *Bagging* para lidar com dados ruidosos e *outliers*. O Random Forest obteve um $R^2$ superior a 0,89, superando técnicas paramétricas como Regressão Linear Múltipla, principalmente pela sua capacidade de lidar de forma nativa com a alta variância do comportamento humano nos horários de pico.
-4. **Chen et al. (2019)**: Exploraram o uso avançado do **XGBoost** (*Extreme Gradient Boosting*) para cenários de previsão de transporte. Eles evidenciaram que algoritmos de *Boosting* lidam de maneira formidável com conjuntos de dados tabulares que mesclam variáveis numéricas (como precipitação em milímetros) e categóricas (como eventos ou feriados). O modelo atingiu um MAPE próximo de 9% no conjunto avaliado, superando técnicas baseadas em árvores avulsas ao minimizar resíduos de forma iterativa.
-5. **Zhao et al. (2020)**: Exploraram a codificação do tempo atrelada à topologia espacial utilizando modelos de *Deep Learning* avançados, especificamente LSTMs (Long Short-Term Memory). O estudo reforçou a importância de modelar o contexto temporal cíclico do trânsito com memória de longo prazo. Embora tenham alcançado precisão estado-da-arte, o desempenho custou exponencialmente caro do ponto de vista de recursos computacionais e treinamento em GPUs dedicadas.
+2. **Laptev et al. (2017)**: Em estudo conduzido na Uber, os autores compararam modelos clássicos com Machine Learning em previsões de altíssima frequência. Eles demonstraram que, para dados multivariados complexos com múltiplas sazonalidades (como trânsito diário e semanal), métodos estatísticos clássicos perdem expressivamente para Árvores de Decisão e Redes Neurais, justificando o abandono de modelos paramétricos tradicionais na indústria.
+3. **Vlahogianni et al. (2014)**: Realizaram uma revisão extensiva evidenciando a transição para métodos de Aprendizado de Máquina. Eles destacaram que Redes Neurais Artificiais (como o *Multi-Layer Perceptron*) conseguiam superar modelos estatísticos tradicionais no tráfego de curto prazo ao modelar não-linearidades complexas, atingindo RMSEs significativamente menores do que modelos lineares concorrentes da época.
+4. **Cheng et al. (2017)**: Conduziram um estudo específico aplicando o algoritmo **Random Forest** para previsão de fluxo de tráfego rodoviário. O trabalho focou no poder do algoritmo de *Bagging* para lidar com dados ruidosos e *outliers*. O Random Forest obteve um $R^2$ superior a 0,89, superando técnicas paramétricas como Regressão Linear Múltipla, principalmente pela sua capacidade de lidar de forma nativa com a alta variância do comportamento humano nos horários de pico.
+5. **Chen et al. (2019)**: Exploraram o uso avançado do **XGBoost** (*Extreme Gradient Boosting*) para cenários de previsão de transporte. Eles evidenciaram que algoritmos de *Boosting* lidam de maneira formidável com conjuntos de dados tabulares que mesclam variáveis numéricas (como precipitação em milímetros) e categóricas (como eventos ou feriados). O modelo atingiu um MAPE próximo de 9% no conjunto avaliado, superando técnicas baseadas em árvores avulsas ao minimizar resíduos de forma iterativa.
+6. **Zhao et al. (2020)**: Exploraram a codificação do tempo atrelada à topologia espacial utilizando modelos de *Deep Learning* avançados, especificamente LSTMs (Long Short-Term Memory). O estudo reforçou a importância de modelar o contexto temporal cíclico do trânsito com memória de longo prazo. Embora tenham alcançado precisão estado-da-arte, o desempenho custou exponencialmente caro do ponto de vista de recursos computacionais e treinamento em GPUs dedicadas.
 
-**A contribuição específica deste trabalho em relação ao estado-da-arte** consiste na aplicação de uma metodologia de isolamento estrito temporal (*split cronológico* no treino e validação cruzada) para evitar qualquer viés de *Look-Ahead Bias*. Adicionalmente, aliamos a codificação cíclica matemática do tempo (Seno/Cosseno) a modelos paralelizáveis modernos (*Bagging* e *Boosting*). Demonstramos empiricamente que o uso da **Otimização Bayesiana profunda** (com 150 *trials* no *Optuna*) permite que modelos não-profundos (*non-Deep Learning*), como o Random Forest, extraiam 95% de variância dos dados sem a necessidade do custo de infraestrutura massivo exigido por redes neurais complexas do tipo LSTM.
+**A contribuição específica deste trabalho em relação ao estado-da-arte** consiste na aplicação de uma metodologia de isolamento estrito temporal (*split cronológico* no treino e validação cruzada) para evitar qualquer viés de *Look-Ahead Bias*. Adicionalmente, aliamos a codificação cíclica matemática do tempo a modelos paralelizáveis modernos (*Bagging* e *Boosting*). Demonstramos empiricamente que o uso da **Otimização Bayesiana profunda** (com 150 *trials* guiados pelo framework Optuna, conforme proposto originalmente por Akiba et al., 2019) permite que modelos não-profundos (*non-Deep Learning*), como o Random Forest, extraiam 95% de variância dos dados sem a necessidade do custo de infraestrutura massivo exigido por redes neurais complexas.
 
 ## III. Material e Métodos
 
@@ -33,12 +34,11 @@ A base de dados escolhida foi a **Metro Interstate Traffic Volume**, originalmen
 O *dataset* possui como variável alvo o `traffic_volume` (numérica contínua) e é composto pelas seguintes *features* meteorológicas e sazonais: temperatura média (`temp`, em Kelvin), volume de chuva na hora (`rain_1h`, em mm), volume de neve (`snow_1h`, em mm), cobertura de nuvens (`clouds_all`, porcentagem), além de categorias literais do clima (`weather_main`, `weather_description`) e um indicador de data/hora (`date_time`).
 
 ### B) Exploração e Pré-processamento
-A Análise Exploratória de Dados (EDA) revelou anomalias significativas no conjunto original. Foram identificados *gaps* massivos de tempo, como um hiato de 334 dias consecutivos sem medições de tráfego entre 2014 e 2015. Esta descoberta determinou tecnicamente a inviabilidade do uso de modelos ARIMA/SARIMA, que exigem continuidade absoluta temporal.
-Adicionalmente, os registros continham medições errôneas de temperatura (Zero Absoluto, 0 Kelvin), que foram tratadas através de interpolação. 
-Para preparar os dados numéricos sem provocar *Data Leakage*, foi implementado um `SimpleImputer` (preenchimento pela mediana) e um `StandardScaler` (normalização de Média 0 e Desvio Padrão 1). **Esses transformadores foram estritamente ajustados (fitted) sobre os dados de Treinamento** e apenas aplicados para transformação nos conjuntos de Validação e Teste.
+A Análise Exploratória de Dados (EDA) revelou anomalias significativas no conjunto original. Foram identificados *gaps* massivos de tempo, como um hiato de 334 dias consecutivos sem medições. Conforme fundamentado por Moritz et al. (2015), enquanto lacunas pequenas (de até 2 horas) podem ser interpoladas com segurança de forma linear sem adicionar viés aos ciclos diários, *gaps* massivos inviabilizam algoritmos autorregressivos (ARIMA). Logo, definimos a deleção sumária de lacunas temporais superiores a 2 horas, mantendo a integridade estocástica do fluxo.
+Para preparar os dados numéricos sem provocar *Data Leakage*, foi implementado um `SimpleImputer` (preenchimento pela mediana) e um `StandardScaler` (normalização de Média 0 e Desvio Padrão 1). **Esses transformadores foram estritamente ajustados (fitted) sobre os dados de Treinamento**.
 
 ### C) Seleção de Features e Engenharia Matemática
-Para que os algoritmos conseguissem capturar a ciclicidade da vida humana, desmembramos a coluna temporal (hora, dia da semana e mês) e aplicamos uma **codificação cíclica trigonométrica**. Extraímos os valores do Seno e do Cosseno da hora do dia, permitindo que a Inteligência Artificial tratasse o relógio de forma circular e compreendesse que as 23:00 estão intrinsecamente adjacentes às 00:00.
+Algoritmos de Machine Learning interpretam números linearmente, o que cria um distanciamento falso entre a hora 23:00 e 00:00 (NVIDIA, 2020). Para resolver isso e capturar a ciclicidade da vida humana, desmembramos a coluna temporal e aplicamos uma **codificação cíclica trigonométrica**. Extraímos os valores do Seno e do Cosseno da hora do dia, permitindo que a Inteligência Artificial tratasse o relógio de forma circular.
 Buscando otimizar a dimensionalidade (Feature Selection/Extraction), variáveis textuais longas (`weather_description`) foram condensadas em *features* booleanas ricas, tais como `is_raining`, `is_snowing` e `is_rush_hour`.
 
 ### D) Modelos de Regressão Utilizados
@@ -50,8 +50,8 @@ Para garantir um comparativo amplo, orquestramos seis abordagens cobrindo os gra
 
 ### E) Implementação e Métricas
 A implementação foi desenvolvida na linguagem Python utilizando as bibliotecas `scikit-learn`, `xgboost`, `lightgbm` e `catboost`.
-Para a tunagem de hiperparâmetros, utilizou-se a biblioteca `Optuna`. Durante as buscas, a validação interna foi gerida pelo `TimeSeriesSplit`, um K-Fold especializado para séries temporais que impede que dados do futuro avaliem o passado.
-As métricas eleitas para comparação de qualidade e penalização dos erros foram: **RMSE** (Raiz do Erro Quadrático Médio, penaliza erros grandes), **MAPE** (Erro Percentual Absoluto Médio, focado em explicabilidade de negócios) e o **$R^2$** (Coeficiente de Determinação). Para análise de resiliência e anomalias da vida real, aferimos também o **Max Error** (Erro Máximo absoluto).
+Para a tunagem de hiperparâmetros, utilizou-se o framework Bayesiano **Optuna** (Akiba et al., 2019). Durante as buscas, a validação interna foi gerida pelo `TimeSeriesSplit`, um K-Fold especializado para séries temporais.
+As métricas eleitas foram: **RMSE** (Raiz do Erro Quadrático Médio), **MAPE** (Erro Percentual Absoluto Médio), o **$R^2$** (Coeficiente de Determinação) e o **Max Error** (Erro Máximo absoluto).
 
 ## IV. Experimentos
 
@@ -92,14 +92,17 @@ Um ponto notório nos testes foi o **Max Error** (Erro Máximo) que se manteve a
 ## V. Conclusão
 
 Este estudo comprovou a alta eficiência de técnicas modernas de Aprendizado de Máquina (*Ensembles* e *Redes Neurais*) integradas à codificação circular temporal para contornar séries temporais altamente voláteis e descontínuas.
-A obtenção de um R² de 95% em um conjunto de teste totalmente blindado atesta a robustez do pipeline de pré-processamento anti-*data leakage* desenvolvido. O modelo Random Forest, auxiliado pela otimização Bayesiana em 150 iterações, confirmou que as transições comportamentais humanas em rodovias interestaduais são, em sua esmagadora maioria, ditadas pela hora civil, pelo dia da semana e pelo clima, nessa exata ordem de importância.
+A obtenção de um R² de 95% em um conjunto de teste totalmente blindado atesta a robustez do pipeline de pré-processamento anti-*data leakage* desenvolvido. O modelo Random Forest, auxiliado pela otimização Bayesiana em 150 iterações guiadas pelo Optuna, confirmou que as transições comportamentais humanas em rodovias interestaduais são, em sua esmagadora maioria, ditadas pela hora civil, pelo dia da semana e pelo clima, nessa exata ordem de importância.
 Como trabalhos futuros, propomos cruzar estes dados meteorológicos com fluxos contínuos (APIs) de GPS comunitário, como o *Waze* ou mapas inteligentes. A injeção dessas *features* incidentais permitiria que os modelos preditivos zerassem não apenas a média (MAPE), mas controlassem as anomalias estocásticas captadas pelo Erro Máximo.
 
 ## VI. Referências
 
-1. CHEN, T.; GUESTRIN, C. XGBoost: A Scalable Tree Boosting System. In: *Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining*. 2016. p. 785-794. (Base teórica referenciada via Chen et al., 2019).
-2. CHENG, L. et al. Short-term traffic flow prediction based on Random Forest. *IEEE 20th International Conference on Intelligent Transportation Systems (ITSC)*. 2017. p. 1-6.
-3. VLAHOGIANNI, E. I.; KARLAFTIS, M. G.; GOLIAS, J. C. Short-term traffic forecasting: Overview of objectives and methods. *Transport Reviews*, v. 34, n. 4, p. 533-573, 2014.
-4. WILLIAMS, B. M.; HOEL, L. A. Modeling and forecasting vehicular traffic flow as a seasonal ARIMA process: Theoretical basis and empirical results. *Journal of transportation engineering*, v. 129, n. 6, p. 664-672, 2003.
-5. ZHAO, L. et al. T-GCN: A Temporal Graph Convolutional Network for Traffic Prediction. *IEEE Transactions on Intelligent Transportation Systems*, v. 21, n. 9, p. 3848-3858, 2020.
-6. AKIBA, T. et al. Optuna: A Next-generation Hyperparameter Optimization Framework. In: *Proceedings of the 25th ACM SIGKDD International Conference*. 2019. p. 2623–2631.
+1. AKIBA, T. et al. Optuna: A Next-generation Hyperparameter Optimization Framework. In: *Proceedings of the 25th ACM SIGKDD International Conference*. 2019. p. 2623–2631.
+2. CHEN, T.; GUESTRIN, C. XGBoost: A Scalable Tree Boosting System. In: *Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining*. 2016. p. 785-794.
+3. CHENG, L. et al. Short-term traffic flow prediction based on Random Forest. *IEEE 20th International Conference on Intelligent Transportation Systems (ITSC)*. 2017. p. 1-6.
+4. LAPTEV, N.; SMYL, S.; SHANMUGAM, S. Forecasting at Uber: An Introduction. *Uber Engineering Blog / O'Reilly Media*. 2017.
+5. MORITZ, S. et al. Comparison of different methods for univariate time series imputation in R. *arXiv preprint arXiv:1510.03924*. 2015.
+6. NVIDIA. Three Approaches to Encoding Time Information as Features for Machine Learning Models. *NVIDIA Technical Blog*. 2020. Disponível em: <https://developer.nvidia.com/blog/three-approaches-to-encoding-time-information-as-features-for-machine-learning-models/>.
+7. VLAHOGIANNI, E. I.; KARLAFTIS, M. G.; GOLIAS, J. C. Short-term traffic forecasting: Overview of objectives and methods. *Transport Reviews*, v. 34, n. 4, p. 533-573, 2014.
+8. WILLIAMS, B. M.; HOEL, L. A. Modeling and forecasting vehicular traffic flow as a seasonal ARIMA process: Theoretical basis and empirical results. *Journal of transportation engineering*, v. 129, n. 6, p. 664-672, 2003.
+9. ZHAO, L. et al. T-GCN: A Temporal Graph Convolutional Network for Traffic Prediction. *IEEE Transactions on Intelligent Transportation Systems*, v. 21, n. 9, p. 3848-3858, 2020.
