@@ -1,0 +1,17 @@
+{
+    "timestamp_exact": "2026-06-30 21:07:56",
+    "algorithm": "random_forest",
+    "training_time_seconds": 0.73,
+    "metrics": {
+        "RMSE": 440.9823228905565,
+        "MAE": 252.00949221172684,
+        "R2": 0.950208667198055,
+        "MAPE_percentage": 10.71700174146549,
+        "Max_Error": 5088.7624450018675
+    },
+    "hyperparameters": {
+        "n_estimators": 100,
+        "max_depth": 9,
+        "min_samples_split": 3
+    }
+}
