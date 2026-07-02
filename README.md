@@ -49,8 +49,7 @@ This project uses the **Metro Interstate Traffic Volume** dataset from the UCI M
 - `src/`: Production source code of the project. Contains the model factories, evaluator, orchestrator, and plotting scripts. **(See [src/README.md](src/README.md) for deeper details).**
 - `reports/`: Stores the generated JSON metrics logs (`reports/logs/`) and visualization graphs (`reports/figures/`).
 - `models/`: Stores serialized, production-ready `.pkl` models.
-- `docs/` and `contexto_trabalho_AM_USP/`: Contains the academic requirements and drafts for the final report.
-
+- `docs/`: Contains the academic requirements and drafts for the final report.
 ---
 
 ## How to Clone and Run Locally

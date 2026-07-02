@@ -12,7 +12,7 @@ O rápido crescimento populacional e a expansão urbana das últimas décadas tr
 
 Este trabalho aborda o problema da predição estocástica do volume de tráfego na rodovia Interestadual I-94 (EUA) utilizando a base de dados *Metro Interstate Traffic Volume*. O objetivo central é analisar se as condições climáticas locais aliadas a informações puramente temporais (horas, dias e meses) são suficientes para treinar algoritmos de Aprendizado de Máquina capazes de capturar e prever micro e macrotendências do fluxo de carros.
 
-Para solucionar este desafio de regressão de série temporal, aplicamos um leque de técnicas robustas de Ciência de Dados, englobando modelos lineares, *Ensembles* de *Bagging* (Random Forest), *Boosting* (XGBoost, LightGBM, CatBoost) e Redes Neurais (MLP). Este artigo detalha a metodologia rigorosa utilizada para extrair padrões temporais sem incorrer em vazamento de dados (*data leakage*), comparando as performances através de otimização Bayesiana (*Optuna*). Na seção seguinte, apresentamos os trabalhos relacionados; na seção III, detalhamos o tratamento da base de dados e os algoritmos implementados. A seção IV é dedicada à exposição e discussão dos experimentos e, por fim, a seção V consolida as conclusões obtidas.
+Para solucionar este desafio de regressão de série temporal, aplicou-se um leque de técnicas robustas de Ciência de Dados, englobando modelos lineares, *Ensembles* de *Bagging* (Random Forest), *Boosting* (XGBoost, LightGBM, CatBoost) e Redes Neurais (MLP). Este artigo detalha a metodologia rigorosa utilizada para extrair padrões temporais sem incorrer em vazamento de dados (*data leakage*), comparando as performances através de otimização Bayesiana (*Optuna*). Na seção seguinte, são apresentados os trabalhos relacionados; na seção III, detalha-se o tratamento da base de dados e os algoritmos implementados. A seção IV é dedicada à exposição e discussão dos experimentos e, por fim, a seção V consolida as conclusões obtidas.
 
 ## II. Trabalhos Relacionados
 
@@ -25,69 +25,126 @@ A predição de tráfego tem sido amplamente estudada na intersecção entre Eng
 5. **Chen et al. (2019)**: Exploraram o uso avançado do **XGBoost** (*Extreme Gradient Boosting*) para cenários de previsão de transporte. Eles evidenciaram que algoritmos de *Boosting* lidam de maneira formidável com conjuntos de dados tabulares que mesclam variáveis numéricas (como precipitação em milímetros) e categóricas (como eventos ou feriados). O modelo atingiu um MAPE próximo de 9% no conjunto avaliado, superando técnicas baseadas em árvores avulsas ao minimizar resíduos de forma iterativa.
 6. **Zhao et al. (2020)**: Exploraram a codificação do tempo atrelada à topologia espacial utilizando modelos de *Deep Learning* avançados, especificamente LSTMs (Long Short-Term Memory). O estudo reforçou a importância de modelar o contexto temporal cíclico do trânsito com memória de longo prazo. Embora tenham alcançado precisão estado-da-arte, o desempenho custou exponencialmente caro do ponto de vista de recursos computacionais e treinamento em GPUs dedicadas.
 
-**A contribuição específica deste trabalho em relação ao estado-da-arte** consiste na aplicação de uma metodologia de isolamento estrito temporal (*split cronológico* no treino e validação cruzada) para evitar qualquer viés de *Look-Ahead Bias*. Adicionalmente, aliamos a codificação cíclica matemática do tempo a modelos paralelizáveis modernos (*Bagging* e *Boosting*). Demonstramos empiricamente que o uso da **Otimização Bayesiana profunda** (com 150 *trials* guiados pelo framework Optuna, conforme proposto originalmente por Akiba et al., 2019) permite que modelos não-profundos (*non-Deep Learning*), como o Random Forest, extraiam 95% de variância dos dados sem a necessidade do custo de infraestrutura massivo exigido por redes neurais complexas.
+**A contribuição específica deste trabalho em relação ao estado-da-arte** consiste na aplicação de uma metodologia de isolamento estrito temporal (*split cronológico* no treino e validação cruzada) para evitar qualquer viés de *Look-Ahead Bias*. Adicionalmente, aliou-se a codificação cíclica matemática do tempo a modelos paralelizáveis modernos (*Bagging* e *Boosting*). Demonstrou-se empiricamente que o uso da **Otimização Bayesiana profunda** (com 150 *trials* guiados pelo framework Optuna, conforme proposto originalmente por Akiba et al., 2019) permite que modelos não-profundos (*non-Deep Learning*), como o Random Forest, extraiam 95% de variância dos dados sem a necessidade do custo de infraestrutura massivo exigido por redes neurais complexas.
 
 ## III. Material e Métodos
 
 ### A) Apresentação do Dataset
-A base de dados escolhida foi a **Metro Interstate Traffic Volume**, originalmente disponibilizada no repositório público UCI Machine Learning Repository. O conjunto compreende 48.204 instâncias de dados horários do volume de tráfego da rodovia I-94 na direção oeste, coletados pela estação ATR 301 (Minnesota) entre os anos de 2012 e 2018.
-O *dataset* possui como variável alvo o `traffic_volume` (numérica contínua) e é composto pelas seguintes *features* meteorológicas e sazonais: temperatura média (`temp`, em Kelvin), volume de chuva na hora (`rain_1h`, em mm), volume de neve (`snow_1h`, em mm), cobertura de nuvens (`clouds_all`, porcentagem), além de categorias literais do clima (`weather_main`, `weather_description`) e um indicador de data/hora (`date_time`).
+A base de dados escolhida foi a **Metro Interstate Traffic Volume**, originalmente disponibilizada no repositório público [UCI Machine Learning Repository](https://archive.ics.uci.edu/dataset/492/metro+interstate+traffic+volume). O conjunto compreende 48.204 instâncias de dados horários do volume de tráfego da rodovia I-94 na direção oeste, coletados pela estação ATR 301 (Minnesota) entre os anos de 2012 e 2018.
+O *dataset* possui como variável alvo o `traffic_volume` (numérica contínua) e é composto pelas seguintes *features* meteorológicas e sazonais: presença de feriados (`holiday`), temperatura média (`temp`, em Kelvin), volume de chuva na hora (`rain_1h`, em mm), volume de neve (`snow_1h`, em mm), cobertura de nuvens (`clouds_all`, porcentagem), além de categorias literais do clima (`weather_main`, `weather_description`) e um indicador de data/hora (`date_time`).
 
 ### B) Exploração e Pré-processamento
-A Análise Exploratória de Dados (EDA) revelou anomalias significativas no conjunto original. Foram identificados *gaps* massivos de tempo, como um hiato de 334 dias consecutivos sem medições. Conforme fundamentado por Moritz et al. (2015), enquanto lacunas pequenas (de até 2 horas) podem ser interpoladas com segurança de forma linear sem adicionar viés aos ciclos diários, *gaps* massivos inviabilizam algoritmos autorregressivos (ARIMA). Logo, definimos a deleção sumária de lacunas temporais superiores a 2 horas, mantendo a integridade estocástica do fluxo.
-Para preparar os dados numéricos sem provocar *Data Leakage*, foi implementado um `SimpleImputer` (preenchimento pela mediana) e um `StandardScaler` (normalização de Média 0 e Desvio Padrão 1). **Esses transformadores foram estritamente ajustados (fitted) sobre os dados de Treinamento**.
+A Análise Exploratória de Dados (EDA) inicial da série temporal revelou desafios críticos de qualidade e continuidade. Foram identificados 11.976 registros faltantes, formando *gaps* de tamanhos variados. Destaca-se um hiato massivo de medições entre agosto de 2014 e junho de 2015.
+
+**Figura 1 — Mapa de Calor de Dados Faltantes**
+![Heatmap Missing](../images/01-exploration/heatmap_of_missing_timestamps.png)
+
+Conforme fundamentado por Moritz et al. (2015), enquanto pequenas lacunas (*gaps*) podem ser interpoladas de forma segura, períodos extensos de falha quebram a continuidade. Para além do hiato crítico do apagão de 2014-2015, a análise evidenciou múltiplos blocos contínuos de dados faltantes com duração superior a 2 horas espalhados pelo histórico (ex: Outubro de 2013 e Junho de 2014). Projetar volumes para janelas vazias tão longas através de interpolação provou-se perigoso no hiperdinâmico contexto do trânsito.
+
+Portanto, optou-se por não imputar esses grandes blocos, descartando-os. O custo dessa decisão técnica foi a geração inevitável de "micro-buracos" espalhados ao longo dos blocos contínuos do *dataset*. 
+
+A persistência desses furos estocásticos é fatal para modelos clássicos de Séries Temporais. Algoritmos auto-regressivos como ARIMA e SARIMA exigem matematicamente que os instantes de tempo ocorram em intervalos rigorosamente equidistantes (sem furos). A presença de buracos e recortes na base de dados quebra os cálculos estruturais de defasagem matemática (*lags*) e arruína a performance preditiva desses modelos temporais clássicos (Williams e Hoel, 2003). Por esse exato motivo, descartou-se o uso do SARIMA em favor do Aprendizado de Máquina (Regressão e *Ensembles*). Algoritmos de Machine Learning não sofrem com a falta de equidistância das linhas, prevendo os valores apoiando-se diretamente na matemática transversal das características cíclicas e meteorológicas que engenhamos.
+
+Para hiatos curtíssimos (até 2 horas), orquestrou-se a **Interpolação Linear** para contínuas e *Forward Fill* para categorias.
+
+A investigação univariada detectou erros severos nos sensores (*outliers* lógicos): instâncias de temperatura em $0 \text{ K}$ (zero absoluto) e chuva de $9831 \text{ mm/h}$. Tais discrepâncias foram limpas antes da imputação. Por fim, para evitar vazamento de informações (*Data Leakage*), transformadores estatísticos de preenchimento (`SimpleImputer`) e de normalização (`StandardScaler`) foram **estritamente ajustados (fitted) sobre os dados de Treinamento**.
+
+O resultado das etapas de limpeza e reconstrução é um *dataset* contínuo e estocasticamente sólido, composto por 42.880 registros úteis, conforme ilustrado na Figura 2, estabelecendo a base confiável para a engenharia de atributos subsequente.
+
+**Figura 2 — Série Temporal Contínua Pós-Preprocessamento**
+![Timeline Pós-Limpeza](../images/02-exploration_after_preprocess/traffic_volume_timeline.png)
 
 ### C) Seleção de Features e Engenharia Matemática
-Algoritmos de Machine Learning interpretam números linearmente, o que cria um distanciamento falso entre a hora 23:00 e 00:00 (NVIDIA, 2020). Para resolver isso e capturar a ciclicidade da vida humana, desmembramos a coluna temporal e aplicamos uma **codificação cíclica trigonométrica**. Extraímos os valores do Seno e do Cosseno da hora do dia, permitindo que a Inteligência Artificial tratasse o relógio de forma circular.
-Buscando otimizar a dimensionalidade (Feature Selection/Extraction), variáveis textuais longas (`weather_description`) foram condensadas em *features* booleanas ricas, tais como `is_raining`, `is_snowing` e `is_rush_hour`.
+Com o *dataset* limpo, a segunda etapa da análise focou na criação de novos atributos (*Feature Engineering*) e na rigorosa seleção final das colunas.
+
+Primeiramente, o atributo temporal original (`date_time`) foi desmembrado em componentes intermediárias (`hour`, `day_of_week`, `month`, `year`). Contudo, para evitar que algoritmos interpretassem o tempo de forma estritamente linear, aplicou-se a **codificação cíclica trigonométrica** (Seno e Cosseno) das horas e dias da semana (`hour_sin`, `hour_cos`, `day_sin`, `day_cos`) (NVIDIA, 2020). A partir das componentes de data, extraíram-se também *flags* booleanas temporais fundamentais: `is_weekend` (final de semana), `is_rush_hour` (horário de pico) e `is_holiday` (derivada da matriz categórica rala de feriados). A eficácia foi atestada: `hour_cos` obteve -0.76 de correlação com o tráfego, enquanto `is_rush_hour` obteve 0.57. A variável contínua de chuva também sofreu uma transformação logarítmica (`rain_1h_log`) para combater sua extrema assimetria.
+
+Na frente climática, detectaram-se falhas silenciosas (*silent failures*): o sensor numérico `snow_1h` marcou 0.0 em 2.264 horas nas quais o texto oficial reportava nevascas. Substituíram-se então sensores duvidosos e descrições complexas por *flags* binárias robustas via expressões regulares (`is_raining`, `is_snowing`, `is_foggy_misty`).
+
+Para garantir robustez técnica, prevenir a explosão dimensional (*One-Hot Encoding*) e evitar severa multicolinearidade, o conjunto foi selado com as seguintes definições:
+
+**Atributos Mantidos (Features to KEEP):**
+- **Target:** `traffic_volume`
+- **Numéricos Contínuos:** `temp`, `clouds_all`, `rain_1h_log`
+- **Temporais Cíclicos:** `hour_sin`, `hour_cos`, `day_sin`, `day_cos`
+- **Flags Binárias:** `is_weekend`, `is_rush_hour`, `is_holiday`, `is_raining`, `is_snowing`, `is_foggy_misty`
+
+**Atributos Descartados (Features to DROP):**
+- **Datas Originais e Intermediárias:** `date_time` (variável original), além de `hour`, `day_of_week`, `month`, `year` (extraídas apenas temporariamente). Foram integralmente substituídas pelas coordenadas circulares.
+- **Textos Categóricos:** `weather_main`, `weather_description`, `holiday` (Trocadas pelas booleanas para evitar *dummies*).
+- **Numéricos Defeituosos/Enviesados:** `snow_1h` (devido a falhas no sensor) e `rain_1h` (substituída pela forma logarítmica).
 
 ### D) Modelos de Regressão Utilizados
-Para garantir um comparativo amplo, orquestramos seis abordagens cobrindo os grandes grupos do Aprendizado de Máquina:
 1. **Modelos Lineares Clássicos:** Regressão Ridge (utilizada como *baseline*).
 2. **Ensembles Paralelos (Bagging):** Random Forest.
 3. **Ensembles Sequenciais (Boosting):** XGBoost, LightGBM e CatBoost.
 4. **Redes Neurais Artificiais:** Multi-Layer Perceptron (MLP).
 
-### E) Implementação e Métricas
-A implementação foi desenvolvida na linguagem Python utilizando as bibliotecas `scikit-learn`, `xgboost`, `lightgbm` e `catboost`.
-Para a tunagem de hiperparâmetros, utilizou-se o framework Bayesiano **Optuna** (Akiba et al., 2019). Durante as buscas, a validação interna foi gerida pelo `TimeSeriesSplit`, um K-Fold especializado para séries temporais.
-As métricas eleitas foram: **RMSE** (Raiz do Erro Quadrático Médio), **MAPE** (Erro Percentual Absoluto Médio), o **$R^2$** (Coeficiente de Determinação) e o **Max Error** (Erro Máximo absoluto).
+O *pipeline* de modelagem foi desenvolvido de forma modular. Para a sintonia fina, ao invés da lenta varredura tradicional (*Grid Search*), adotou-se o *framework* **Optuna**. O Optuna é uma biblioteca de **Otimização Bayesiana**, que utiliza modelos probabilísticos para "aprender" quais hiperparâmetros funcionam melhor, guiando inteligentemente as próximas tentativas para as áreas mais promissoras do espaço de busca.
+
+Para garantir rigor estrito em série temporal, o Optuna foi acoplado a um `TimeSeriesSplit`. Diferente do clássico *K-Fold*, que embaralha a base inteira, o `TimeSeriesSplit` aplica **validação cruzada em janelas deslizantes cronológicas**. Isso assegura que o algoritmo treine apenas com o passado para prever o futuro, anulando o risco catastrófico de *Look-Ahead Bias* (vazamento de dados do futuro para o passado).
+
+O desempenho foi julgado a partir de quatro métricas primárias: o **RMSE** (Raiz do Erro Quadrático Médio), que atua penalizando severamente falhas de grandes proporções; o **$R^2$** (Coeficiente de Determinação), que avalia qual a proporção da variância total do tráfego o modelo foi capaz de decifrar; o **MAPE** (Erro Percentual Absoluto Médio), essencial por converter as métricas de escala absoluta para percentual (ex: um erro médio de 10%), oferecendo uma inteligibilidade humana muito maior sobre a assertividade operacional do modelo; e, crucialmente, o **Erro Máximo** (*Max Error*), incluído deliberadamente para capturar os piores cenários isolados, evidenciando como os modelos falham de forma miserável perante a eventos rodoviários altamente anômalos.
 
 ## IV. Experimentos
 
-### IV.1) Experimentos Realizados e Metodologia de Validação
-O *dataset* foi separado cronologicamente em **Treino (70%), Validação (15%) e Teste (15%)**. O conjunto de Validação sofreu a iteração de buscas bayesianas. 
+Conforme delineado na metodologia, o *dataset* foi estritamente fatiado em ordem cronológica: **Treino (70%)**, **Validação (15%)** e **Teste (15%)**. É vital ressaltar que o algoritmo *Optuna* consumiu exclusivamente a partição de Treino (utilizando sua própria divisão interna de *TimeSeriesSplit*) para buscar os hiperparâmetros ótimos. A partição de Validação não sofreu nenhum vazamento ou ajuste; ela atuou como um árbitro cego, recebendo as predições dos modelos recém-tunados para ranqueá-los de forma isenta.
 
-Após a conclusão da Validação, o algoritmo superior (**Random Forest**) foi submetido a uma busca severa de **150 trials** no Optuna. O melhor modelo gerado foi, então, exposto ao Conjunto de Teste (The Vault) para consolidar a precisão em dados jamais observados pela máquina.
+Na fase de Validação, todos os modelos *ensembles* e lineares foram submetidos a uma segunda bateria contendo 50 *trials* de otimização Bayesiana. A exceção foi a rede neural MLP: ela participou apenas da primeira bateria exploratória de 10 *trials*. Devido ao seu elevadíssimo custo computacional e à extrema eficiência já demonstrada pelas árvores, o MLP foi poupado da bateria de 50 *trials*, servindo apenas de referencial. O Random Forest consagrou-se como o melhor modelo.
 
-**Tabela 1 — Melhores Hiperparâmetros do Modelo Vencedor (Random Forest)**
+A Tabela 1 exibe as topologias descobertas na fase de validação, incluindo os *trials* realizados. A Tabela 2 compara o desempenho numérico.
 
-| Modelo | n_estimators | max_depth | min_samples_split |
-|--------|--------------|-----------|-------------------|
-| Random Forest | 100 | 9 | 3 |
+**Tabela 1 — Melhores Hiperparâmetros na Fase de Validação**
+| Modelo | Trials | Hiperparâmetros Principais Encontrados |
+| :--- | :--- | :--- |
+| Random Forest | 50 | `n_est=100`, `max_depth=9`, `min_samples=8` |
+| XGBoost | 50 | `n_est=300`, `max_depth=6`, `lr=0.012`, `sub=0.65` |
+| LightGBM | 50 | `n_est=300`, `max_depth=7`, `lr=0.012`, `leaves=80` |
+| CatBoost | 50 | `iterations=150`, `depth=10`, `lr=0.029` |
+| MLP | 10 | `layers=(50,50)`, `alpha=0.001`, `lr_init=0.0003` |
 
-**Figura 1 — Comparação das Métricas na Fase de Validação**
-*(Incluir Imagem)*
-![Comparação de Métricas](../reports/figures/metrics_comparison.png)
+**Tabela 2 — Validação (Desempenho dos Algoritmos)**
+| Modelo | RMSE | MAE | MAPE (%) | $R^2$ | Erro Máx |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Random Forest** | **466.20** | **258.64** | **10.67** | **0.9445** | **5003.58** |
+| XGBoost | 468.42 | 276.47 | 14.09 | 0.9440 | 4980.13 |
+| LightGBM | 469.09 | 277.50 | 13.58 | 0.9438 | 5128.28 |
+| CatBoost | 469.25 | 272.18 | 12.55 | 0.9438 | 5018.51 |
+| MLP | 475.96 | 271.71 | 11.38 | 0.9421 | 5202.26 |
+| Ridge (Baseline) | 934.87 | 680.45 | 51.00 | 0.7770 | 4012.02 |
 
-### IV.2) Resultados e Discussão
+Na fase de validação, observou-se claramente a superioridade de algoritmos não-lineares. O Ridge (*baseline*) obteve um MAPE de 51%, falhando de forma severa em capturar o acúmulo de veículos em horários de *rush*. Por outro lado, a métrica de **Erro Máximo** deixou claro que todos os algoritmos não-lineares apresentaram falhas de predição pontuais orbitando os 5.000 veículos. Esses resíduos massivos evidenciam uma limitação clássica de Inteligência Artificial: é matematicamente impossível prever eventos estocásticos de interrupção (ex: acidentes, obras na pista) utilizando apenas datas e previsões meteorológicas.
 
-Na fase exploratória e de validação (Figura 1), observou-se claramente a superioridade de algoritmos não-lineares. O modelo linear (Ridge) naufragou com um MAPE de 51%, provando que equações lineares simples não capturam as curvas drásticas de aceleração e desaceleração de volume durante horários de *rush*. Os *ensembles* de Boosting e Bagging empataram tecnicamente em acurácia de ponta.
+### Otimização Massiva e Teste Definitivo (Campeão)
 
-**No Teste Definitivo (Random Forest)**, o modelo atingiu resultados estelares:
+Como o algoritmo superior (**Random Forest**) apresentou a maior estabilidade e acurácia, ele avançou isoladamente para a etapa definitiva de Teste. Para extrair seu potencial preditivo máximo, o RF foi submetido a uma massiva terceira rodada de **150 *trials*** no Optuna, fundindo os conjuntos de Treino + Validação (85%). O modelo atingiu a topologia absoluta de: `n_estimators=100`, `max_depth=9`, `min_samples_split=3`.
+
+Ao realizar inferência final na partição de Teste intocada (últimos 15%), o modelo atingiu resultados estelares:
 - **RMSE:** 440.98
 - **MAPE:** 10.71%
 - **$R^2$:** 0.9502
+- **Erro Máx:** 5088.76
 
 Explicar **95% da variância (R²)** de um fluxo caótico impulsionado por seres humanos é algo notável e atinge o estado-da-arte para predição puramente contextual (sem dados de vídeo ou GPS na *feature list*). Um MAPE de ~10% reflete uma resiliência fantástica frente a dados ocultos.
 
-**Figura 2 — Visões Temporais de Predição no Teste (Random Forest)**
+**Figura 2 — Exemplo de Árvore de Decisão Construída (Random Forest)**
+![Árvore de Decisão](../reports/figures/rf_decision_tree.png)
+*Recorte de um dos estimadores do Random Forest (profundidade máxima reduzida a 3 para visualização). A árvore evidencia as decisões sequenciais tomadas pelo algoritmo (divisões nos nós) baseadas nas variáveis mais informativas.*
+
+A visualização da árvore de decisão desmistifica o caráter de "caixa-preta" (*black box*) comumente associado aos modelos não-lineares. Tratando-se de uma árvore de regressão, os componentes de cada nó possuem interpretações matemáticas precisas:
+- A **regra de divisão** (ex: `hour_sin <= 0.129`): a condição testada para separar os dados. O algoritmo busca, a cada passo, o ponto de corte que resulte na maior queda da variância total somada dos nós filhos.
+- **`samples`**: o número de amostras históricas (horas do *dataset* de treino) que se encaixaram nas regras daquele ramo.
+- **`value`**: o volume de tráfego contínuo previsto. Em árvores de regressão, este valor representa a média (average) do volume real de todas as amostras presentes no nó.
+- **`squared_error`**: a variância (Erro Quadrático Médio) do tráfego das amostras em relação à média predita (`value`). O objetivo das sucessivas ramificações é isolar padrões até atingir folhas puras, minimizando drasticamente esse erro.
+
+Essa extração ilustra de maneira enfática o sucesso da engenharia de atributos (Feature Engineering) cíclica. Como se nota na Figura 2, no primeiro corte (Nó Raiz), a característica julgada pelo modelo matemático como a mais determinante para o volume de tráfego foi exatamente a variável transformada `hour_sin` (seno da hora). Esta evidência empírica atesta que a flutuação do trânsito na I-94 é essencialmente pautada pelas rotinas cíclicas da civilização e corrobora a adequação da transformação trigonométrica para permitir que o algoritmo apreenda as continuidades da madrugada para o novo dia.
+
+**Figura 3 — Visões Temporais de Predição no Teste (Random Forest)**
 *(Incluir Imagens)*
 ![Recorte 1 Mês](../reports/figures/RANDOM_FOREST_ts_month.png)
 ![Recorte 3 Dias](../reports/figures/RANDOM_FOREST_ts_3days.png)
 
-Como observado na Figura 2, o recorte de microtendências (3 dias) demonstra a perfeição que a codificação cíclica trigonométrica proporcionou: as árvores conseguem simular visualmente uma onda perfeitamente síncrona com os horários de vale (madrugada) e horários de pico comercial, desvendando o comportamento temporal subjacente.
-Um ponto notório nos testes foi o **Max Error** (Erro Máximo) que se manteve acima da faixa dos 5.000 carros pontualmente. O que poderia parecer uma falha, na realidade prova a estocasticidade de rodovias: engavetamentos, blitz policiais ou interdições para manutenção bloqueiam fisicamente a via. O algoritmo, munido apenas de termômetro e calendário civil, invariavelmente não possuirá ferramentas matemáticas para prever esse incidente externo.
+Como observado na Figura 4, a codificação trigonométrica permitiu simular visualmente uma onda perfeitamente fluida e sincronizada com os horários de vale e pico comercial.
 
 ## V. Conclusão
 

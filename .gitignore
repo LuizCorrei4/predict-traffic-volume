@@ -231,4 +231,6 @@ contexto_trabalho_AM_USP/
 # Models outputs
 models/
 *.pkl
+# folder to submit for the discipline 
+entrega_am_15639682_LuizCorreia/
 
